@@ -1,19 +1,25 @@
 import ttkbootstrap as ttkb
-from ttkbootstrap.style import Bootstyle
+from tkinter import ttk
+from tkinter import Canvas
+from PIL import Image, ImageTk
 
 
 class NotificationGui(ttkb.Window):
     def __init__(self):
         super().__init__(themename='darkly',
                          title="HIDE THIS",
-                         minsize=(600, 200),
-                         resizable=(False,False),
-                         alpha=0.95,
-                         overrideredirect=False
-                        )  
+                         resizable=(False, False),
+                         overrideredirect=True
+                         )
+        self.geometry("600x200")
+
+
+        
+
 
         # Creating two frames
-        right_frame = ttkb.Frame(self, bootstyle='danger')
+        
+        right_frame = RightFrame(self)
         # left_frame = ttkb.Frame(self, bootstyle="info")
         left_frame = LeftFrame(self)
 
@@ -22,15 +28,15 @@ class NotificationGui(ttkb.Window):
         self.columnconfigure((0, 1, 2), weight=1, uniform='a')
 
         # right_frame.pack(side= 'left',fill='both',expand='true')
-        right_frame.grid(row=0, column=0, sticky="news")
-        left_frame.grid(row=0, column=1, columnspan=2, sticky="news")
+        left_frame.grid(row=0, column=0, sticky="news")
+        right_frame.grid(row=0, column=1, columnspan=2, sticky="news")
 
-        self.bind('<Double-Button-1>',lambda event : self.destroy())
-        self.set_geometry(window=self)
+        self.bind('<Double-Button-1>', lambda event: self.destroy())
+        self.set_window_position(window=self,position=(15, 25, 'se'))
 
         self.mainloop()
 
-    def set_geometry(self, window, position=(15, 25, 'se')):
+    def set_window_position(self, window, position=(15, 25, 'se')):
         """
         Set the geometry of a window based on a specified position and anchor.
 
@@ -63,11 +69,35 @@ class NotificationGui(ttkb.Window):
 
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
+
+class RightFrame(ttkb.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(master=parent, bootstyle='primary',
+                         *args, **kwargs)
+
+
 class LeftFrame(ttkb.Frame):
-    def __init__(self,parent,*args,**kwargs):
-        super().__init__(master=parent,bootstyle= 'primary',*args,**kwargs)
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(master=parent, bootstyle='success',
+                         *args, **kwargs)
         
+        self.path = r'C:\Users\prash\Downloads\running.jpg'
+        self.canvas = Canvas(master=self,bd=0, highlightthickness=0, relief='ridge')
+        self.canvas.configure(bg= 'blue')
+        self.canvas.pack(expand=True,fill="both",padx=5,pady=5)
         
+        self.canvas.bind("<Configure>", self.laod_and_place_image)
+
+
+    def laod_and_place_image(self,event):  # thumbnail work directly on the image 
+        canvas_width = event.width
+        canvas_height = event.height
+
+        self.img = Image.open(self.path)
+        
+        self.img.thumbnail((event.width,event.height))
+        self.img_tk = ImageTk.PhotoImage(self.img)
+        self.canvas.create_image(canvas_width/2,canvas_height/2,image=self.img_tk)
 
 
 if __name__ == "__main__":
@@ -75,5 +105,3 @@ if __name__ == "__main__":
     # root = ttkb.Window()
 
     # root.mainloop()
-
-

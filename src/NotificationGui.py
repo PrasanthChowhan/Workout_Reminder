@@ -1,24 +1,21 @@
 import ttkbootstrap as ttkb
 from tkinter import ttk
-from tkinter import Canvas
+from tkinter import Canvas, font
 from PIL import Image, ImageTk
+from src.utils import helper_functions as helpers
 
 
 class NotificationGui(ttkb.Window):
     def __init__(self):
         super().__init__(themename='darkly',
                          title="HIDE THIS",
-                         resizable=(False, False),
-                         overrideredirect=True
+                        #  resizable=(False, False),
+                        #  overrideredirect=True
                          )
-        self.geometry("600x200")
-
-
-        
-
+        self.geometry("800x266")
 
         # Creating two frames
-        
+
         right_frame = RightFrame(self)
         # left_frame = ttkb.Frame(self, bootstyle="info")
         left_frame = LeftFrame(self)
@@ -31,8 +28,12 @@ class NotificationGui(ttkb.Window):
         left_frame.grid(row=0, column=0, sticky="news")
         right_frame.grid(row=0, column=1, columnspan=2, sticky="news")
 
+        # close button
+        self.close_button = ttk.Button(self, text="Close", command=self.destroy)
+        self.close_button.grid(row=0, column=2, sticky="news")  
+
         self.bind('<Double-Button-1>', lambda event: self.destroy())
-        self.set_window_position(window=self,position=(15, 25, 'se'))
+        self.set_window_position(window=self, position=(15, 25, 'se'))
 
         self.mainloop()
 
@@ -72,32 +73,75 @@ class NotificationGui(ttkb.Window):
 
 class RightFrame(ttkb.Frame):
     def __init__(self, parent, *args, **kwargs):
-        super().__init__(master=parent, bootstyle='primary',
+        super().__init__(master=parent, 
+                        #  bootstyle='primary',
                          *args, **kwargs)
+
+        self.personal_msg_font = None
+        self._setup()
+
+        container = ttkb.Frame(master=self)
+        container.pack(fill='both', expand=True, padx=5, pady=5)
+
+        text = "Nothing is more important than your health ........"
+        personal_message_label = ttkb.Label(master=container, text=text,
+                                            anchor="w",
+                                            font=self.personal_msg_font,)
+        personal_message_label.grid(row=0,column=0,sticky='nesw')
+
+        divider = ttkb.Separator(master=container,bootstyle='info')
+        divider.grid(row=1,column=0,sticky='news',pady=5)
+
+        description_container_frame = ttkb.Frame(master=container,bootstyle='danger')
+        description_container_frame.grid(row=2,column=0,sticky='nesw')
+
+        # reading exercises from json
+        raw_json_dict = helpers.open_json_file('data\exersises.json')
+        exercise = raw_json_dict['Calisthenics']['Exercises']
+
+        muscle_group_label = ttkb.Label(master=description_container_frame,
+                                        text=exercise['Chest'])
+        muscle_group_label.pack(side='left',expand=True,fill='both')
+
+
+        
+
+        
+
+
+
+
+
+        
+    def _setup(self):
+        self.personal_msg_font = font.Font(
+            family='Helvatica', size=15, weight='bold')
 
 
 class LeftFrame(ttkb.Frame):
     def __init__(self, parent, *args, **kwargs):
-        super().__init__(master=parent, bootstyle='success',
+        super().__init__(master=parent, bootstyle='info',
                          *args, **kwargs)
-        
+
         self.path = r'C:\Users\prash\Downloads\running.jpg'
-        self.canvas = Canvas(master=self,bd=0, highlightthickness=0, relief='ridge')
-        self.canvas.configure(bg= 'blue')
-        self.canvas.pack(expand=True,fill="both",padx=5,pady=5)
-        
+        self.canvas = Canvas(
+            master=self, bd=0, highlightthickness=0, relief='ridge')
+        # self.canvas.configure(bg='transparent')
+        self.canvas.pack(expand=True, fill="both", padx=5, pady=5)
+
         self.canvas.bind("<Configure>", self.laod_and_place_image)
 
-
-    def laod_and_place_image(self,event):  # thumbnail work directly on the image 
+    # thumbnail work directly on the image
+    def laod_and_place_image(self, event):
         canvas_width = event.width
         canvas_height = event.height
 
         self.img = Image.open(self.path)
-        
-        self.img.thumbnail((event.width,event.height))
+
+        self.img.thumbnail((event.width, event.height))
         self.img_tk = ImageTk.PhotoImage(self.img)
-        self.canvas.create_image(canvas_width/2,canvas_height/2,image=self.img_tk)
+        self.canvas.create_image(
+            canvas_width/2, canvas_height/2, image=self.img_tk)
 
 
 if __name__ == "__main__":

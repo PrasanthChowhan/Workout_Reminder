@@ -1,19 +1,40 @@
-import tkinter as tk
-from PIL import Image,ImageTk
-import ttkbootstrap as ttkb
+import threading
+import schedule
+import time
 
-root = ttkb.Window()
-# root =tk.Tk()
-root.geometry("600x200")
-frame = ttkb.Frame(root)
+from src.NotificationGui import NotificationGui
 
-frame.pack()
-canvas = ttkb.Canvas(frame,bd=0,bg= 'red', highlightthickness=0, relief='ridge')
 
-canvas.pack()
-canvas.configure(bg='red')
-img_tk = ImageTk.PhotoImage(Image.open(
-            r'C:\Users\prash\Downloads\14455862_5466844 (Custom).jpg'))
-canvas.create_image(0,0,image=img_tk)
 
-root.mainloop()
+def my_scheduled_task():
+    print("Scheduled task executed: ", time.ctime())
+    NotificationGui()
+
+def run_scheduled_task():
+    while True:
+        schedule.run_pending()
+        time.sleep(5)  # Adjust the sleep interval as needed (e.g., longer for lower CPU usage)
+
+# Create a thread for running the scheduled task
+scheduled_task_thread = threading.Thread(target=run_scheduled_task)
+
+# Set the thread as a daemon (so it exits when the main program finishes)
+scheduled_task_thread.daemon = True
+
+# Start the thread
+scheduled_task_thread.start()
+
+schedule.every().second.do(my_scheduled_task)
+
+try:
+    # Continue running the main program concurrently with scheduled tasks
+    while True:
+        # Your main program logic here
+        time.sleep(1)  # Adjust the sleep interval for main program as needed
+
+except KeyboardInterrupt:
+    # Gracefully handle program exit (cleanup and stopping threads if necessary)
+    pass
+
+# Optionally, wait for the scheduled task thread to finish (if it needs cleanup)
+scheduled_task_thread.join()

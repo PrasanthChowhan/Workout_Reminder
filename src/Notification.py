@@ -2,6 +2,8 @@ from tkinter import font
 import ttkbootstrap as ttkb
 from ttkbootstrap.constants import *
 from ttkbootstrap import utility
+from ttkbootstrap.toast import ToastNotification
+import customtkinter as ctk
 
 # Base code from ttkBootsrap ToastNotification
 
@@ -142,7 +144,7 @@ class CustomToastNotification:
         ttkb.Label(
             self.container,
             text=self.message,
-            wraplength=utility.scale_size(self.toplevel, 300),
+            wraplength=utility.scale_size(self.toplevel, 500),
             bootstyle=f"{self.bootstyle}-inverse",
             anchor=NW,
         ).grid(row=1, column=1, sticky=NSEW, padx=10, pady=(0, 5))
@@ -188,6 +190,7 @@ class CustomToastNotification:
             size=_font["size"] + 1,
             weight="bold",
         )
+        print(_font['size'])
         # symbol font
         self.iconfont = font.Font(size=30, weight="bold")
         if winsys == "win32":

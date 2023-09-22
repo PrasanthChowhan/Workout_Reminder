@@ -1,9 +1,9 @@
 import threading
 import schedule
 import time
+import tkinter as tk
 
 from src.NotificationGui import NotificationGui
-
 
 
 def my_scheduled_task():
@@ -13,7 +13,9 @@ def my_scheduled_task():
 def run_scheduled_task():
     while True:
         schedule.run_pending()
-        time.sleep(5)  # Adjust the sleep interval as needed (e.g., longer for lower CPU usage)
+        # Adjust the sleep interval as needed (e.g., longer for lower CPU usage)
+        time.sleep(5)
+
 
 # Create a thread for running the scheduled task
 scheduled_task_thread = threading.Thread(target=run_scheduled_task)
@@ -25,7 +27,10 @@ scheduled_task_thread.daemon = True
 scheduled_task_thread.start()
 
 schedule.every().second.do(my_scheduled_task)
+root = tk.Tk()
 
+NotificationGui()
+root.mainloop()
 try:
     # Continue running the main program concurrently with scheduled tasks
     while True:

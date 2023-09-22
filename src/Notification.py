@@ -3,6 +3,7 @@ import ttkbootstrap as ttkb
 from ttkbootstrap.constants import *
 from ttkbootstrap import utility
 from ttkbootstrap.toast import ToastNotification
+import customtkinter as ctk
 
 # Base code from ttkBootsrap ToastNotification
 

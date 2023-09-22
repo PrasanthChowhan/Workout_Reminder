@@ -1,28 +1,35 @@
-import tkinter as tk
-from tkinter import *
-from tkinter import ttk
-from PIL import Image, ImageTk
+class PythonPizzeria:
+    # Class variable - Shared among all instances
+    num_pizzas_sold = 0
 
-class MyGUI(Frame):
-    def __init__(self):
-        tk.Frame.__init__(self)
-        self.pack()
-        self.master.title("My GUI Window")
-        self.master.geometry("400x300")
-        
-        
-        # Create the image widget
-        self.img = Image.open(r'C:\Users\prash\Downloads\running.jpg')
-        self.image = ImageTk.PhotoImage(self.img)
-        self.image_label = Label(self, image=self.image)
-        self.image_label.grid(row=0, column=0,  sticky=W+E+N+S)
-        
-        # Create the information widget
-        info_label = Label(self, text="Some information about your card")
-        info_label.grid(row=0, column=1, sticky=W+E+N+S)
+    def __init__(self, pizza_name, pizza_price):
+        self.pizza_name = pizza_name
+        self.pizza_price = pizza_price
+        # Every time a pizza is created, we update the class variable
+        PythonPizzeria.num_pizzas_sold += 1
 
-# Create an instance of the MyGUI class
-my_gui = MyGUI()
+    # @classmethod example: Creating a special pizza following a shared recipe
+    @classmethod
+    def create_special_pizza(cls):
+        special_pizza = cls("Special Pizza", 15.99)
+        return special_pizza
 
-# Start the main event loop
-my_gui.mainloop()
+    # @staticmethod example: Slicing a pizza (no need for instance-specific data)
+    @staticmethod
+    def slice_pizza():
+        print("Slicing the pizza!")
+
+# Creating an instance of PythonPizzeria
+pizza1 = PythonPizzeria("Margherita", 12.99)
+pizza2 = PythonPizzeria("Pepperoni", 14.99)
+
+# Using the @classmethod to create a special pizza
+special_pizza = PythonPizzeria.create_special_pizza()
+print(f"Special Pizza: {special_pizza.pizza_name}, Price: ${special_pizza.pizza_price}")
+
+# Using the @staticmethod to slice a pizza
+pizza1.slice_pizza()  # Output: Slicing the pizza!
+pizza2.slice_pizza()  # Output: Slicing the pizza!
+
+# Accessing the class variable
+print(f"Total Pizzas Sold: {PythonPizzeria.num_pizzas_sold}")  # Output: Total Pizzas Sold: 3

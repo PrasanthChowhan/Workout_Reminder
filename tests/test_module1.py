@@ -3,7 +3,7 @@ import schedule
 import time
 import tkinter as tk
 
-from src.NotificationGui import NotificationGui
+from Archieved.NotificationGui import NotificationGui
 
 
 def my_scheduled_task():

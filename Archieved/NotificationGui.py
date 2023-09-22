@@ -13,8 +13,8 @@ class NotificationGui(ttkb.Toplevel):
             resizable=(False, False),
             overrideredirect=True
         )
-        self.geometry("280x500")
-        # self.geometry("800x266")
+        # self.geometry("280x500")
+        self.geometry("800x266")
 
         # Creating two frames
 

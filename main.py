@@ -1,5 +1,5 @@
 import ttkbootstrap as ttkb
-from src.NotificationGui import NotificationGui
+from Archieved.NotificationGui import NotificationGui
 class App():
     def __init__(self):
         NotificationGui()   

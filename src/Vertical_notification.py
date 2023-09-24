@@ -1,6 +1,8 @@
 import ttkbootstrap as ttkb
+from tkinter import Canvas
 import tkinter as tk
 from tkinter import font
+from src.ImageFunctions import MyImage
 from PIL import Image
 
 
@@ -68,6 +70,24 @@ class ImageFrame(ttkb.Frame):
         super().__init__(master=parent,
                          bootstyle='primary',
                          *args, **kwargs)
+        
+        self.create_canvas()
+        
+    def create_canvas(self):
+        self.canvas= Canvas(self, bd=0, highlightthickness=0, relief='ridge')
+        self.canvas.pack(expand=True,fill='both')
+        self.canvas.configure(bg='red')
+        self.canvas.bind('<Configure>',self.place_image)
+
+    def place_image(self,event):
+        path = r'C:\Users\prash\Downloads\running.jpg'
+        myimage = MyImage()
+        resized_image = myimage.resize_image(path,event.width,event.height,preserve_aspect=True,resize_percent_of_original=200)
+        self.resized_image_tk = MyImage.to_tk(resized_image)
+        self.canvas.create_image(event.width/2,event.height/2,image = self.resized_image_tk)
+        
+        
+        
 
 
 class BottomContainer(ttkb.Frame):

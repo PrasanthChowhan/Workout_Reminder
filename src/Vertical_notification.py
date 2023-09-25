@@ -1,4 +1,5 @@
 import ttkbootstrap as ttkb
+import customtkinter as ctk
 from tkinter import Canvas
 import tkinter as tk
 from tkinter import ttk
@@ -7,13 +8,14 @@ from src.ImageFunctions import MyImage,CircleImgIcon
 from PIL import Image
 
 
-class VerticalGui(ttkb.Toplevel):
+class VerticalGui(ctk.CTk):
     def __init__(self):
         super().__init__(
-            title="HIDE THIS",
-            resizable=(False, False),
-            overrideredirect=True
+            
         )
+        self.title="HIDE THIS",
+        self.resizable=(False, False),
+        self.overrideredirect=True
         self.geometry("280x500")
 
         # self.wm_attributes("-transparentcolor", 'white')
@@ -62,14 +64,15 @@ class VerticalGui(ttkb.Toplevel):
             ypos = screen_h - top_h
         else:
             ypos = position[1]
+        print(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
 
-class ImageFrame(ttkb.Frame):
+class ImageFrame(ctk.CTkFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
-                         bootstyle='primary',
+                        
                          *args, **kwargs)
         
         self.create_canvas()
@@ -91,10 +94,10 @@ class ImageFrame(ttkb.Frame):
         
 
 
-class BottomContainer(ttkb.Frame):
+class BottomContainer(ctk.CTkFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
-                         bootstyle='white',
+                         
                          *args, **kwargs)
 
         # initialize
@@ -105,10 +108,11 @@ class BottomContainer(ttkb.Frame):
         # fonts settings
         self._setup()
 
-        text_frame = ttkb.Label(self,
+        text_frame = ctk.CTkLabel(self,
                                 text='Push-up',
-                                bootstyle='black',
-                                font=self.h1).pack(fill='x', pady=6)
+                                
+                                # font=self.h1
+                                ).pack(fill='x', pady=6)
 
         VisualFrame(parent=self).pack(fill='x')
 
@@ -137,56 +141,56 @@ class IconStructure(tk.Frame):
         icon1.configure(background = '#4582ec')
         ttk.Label(master=self,text = text).pack(pady=(5,0))
 
-class VisualFrame(ttkb.Frame):
+class VisualFrame(ctk.CTkFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
-                         bootstyle='primary',
+                         
                          *args, **kwargs)
         path = r"resources\icons\dumbell.png"
         icon = IconStructure(master=self,text='3 x 24',path=path)
         icon.pack(side='left', expand=True, fill='both', pady=10, padx=10)
         
-        icon2 = ttkb.Label(master=self, text='Icon-2',
-                           bootstyle='inverse-primary')
+        icon2 = ctk.CTkLabel(master=self, text='Icon-2',
+                           )
         icon2.pack(side='left', expand=True, fill='both', pady=10, padx=10)
-        icon3 = ttkb.Label(master=self, text='Icon-3',
-                           bootstyle='inverse-primary')
+        icon3 = ctk.CTkLabel(master=self, text='Icon-3',
+                           )
         icon3.pack(side='left', expand=True, fill='both', pady=10, padx=10)
-class DescriptionFrame(ttkb.Frame):
+class DescriptionFrame(ctk.CTkFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
-                         bootstyle='dark',
+                         
                          *args, **kwargs)
         
         # Description heading
-        description_heading_frame = ttkb.Frame(master=self, bootstyle='info')
+        description_heading_frame = ctk.CTkFrame(master=self,)
         description_heading_frame.pack(fill='x', expand=True,anchor='n',pady=5)
 
-        description_heading = ttkb.Label(bootstyle='inverse-info', foreground='#2c2c32',master=description_heading_frame,
+        description_heading = ctk.CTkLabel(fg_color='#2c2c32',master=description_heading_frame,
                                          text="Advantages")
         description_heading.pack(side='left', anchor='nw', padx=5)
 
         # i Icon
-        i_icon_label = ttkb.Label(master=description_heading_frame,text='i')
+        i_icon_label = ctk.CTkLabel(master=description_heading_frame,text='i')
         i_icon_label.pack(side='right', anchor='ne', padx=5)
 
 
 
 
-class ActionButtonsFrame(ttkb.Frame):
+class ActionButtonsFrame(ctk.CTkFrame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
-                         bootstyle='primary',
+                         
                          *args, **kwargs)
         # buttons
-        later_button = ttkb.Button(self, text='Later', bootstyle='link')
+        later_button = ctk.CTkButton(self, text='Later') 
         later_button.pack(side='left', expand=True, fill='both')
-        done_button = ttkb.Button(self, text='I Did It', bootstyle='success')
+        done_button = ctk.CTkButton(self, text='I Did It',)
         done_button.pack(side='left', expand=True, fill='both')
 
 
 if __name__ == '__main__':
-    root = ttkb.Window()
+    # root = ttkb.Window()
     # root.config(bg='blue')
-    VerticalGui()
-    root.mainloop()
+    VerticalGui().mainloop()
+    # root.mainloop()

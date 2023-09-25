@@ -143,9 +143,11 @@ class MyImage:
 
 
 class CircleImgIcon(tk.Canvas):
-    def __init__(self, master, fg_img_path='', animate=True, *args, **kwargs):
+    def __init__(self, master,width= None,height=None, fg_img_path='', animate=True, *args, **kwargs):
+        
         color_behind_canvas = master.cget('background')
-        super().__init__(master=master, background=color_behind_canvas,
+        print(color_behind_canvas)
+        super().__init__(master=master, background=color_behind_canvas,width=width,height=height,
                          bd=0, highlightthickness=0, relief='ridge', *args, **kwargs)
 
         self.fg_img_path = fg_img_path
@@ -153,11 +155,11 @@ class CircleImgIcon(tk.Canvas):
         self.height = None
         self.animate = animate
 
-        if 'width' and 'height' not in kwargs:
+        if width is  None and height is None:
             self.bind('<Configure>', self.create_bg_and_fg)
         else:
-            self.width = kwargs['width']
-            self.height = kwargs['height']
+            self.width = width
+            self.height = height
             self.create_bg_and_fg()
 
     def create_bg_and_fg(self, event=None):
@@ -170,7 +172,7 @@ class CircleImgIcon(tk.Canvas):
 
         # Creating background
         self.background_img = self.my_image.create(
-            shape='rounded_rectangle', radius=18, fill=(204, 242, 255, 170), width=0)
+            shape='circle', fill=(204, 242, 255, 170), width=0)
 
         self.copied_original_imag = self.background_img.copy()
         self.background_img_tk = ImageTk.PhotoImage(self.background_img)
@@ -181,7 +183,7 @@ class CircleImgIcon(tk.Canvas):
         # Foreground image
         if os.path.exists(self.fg_img_path):
             self.resized_foreground_img = self.my_image.resize_image(
-                self.fg_img_path, resize_percent_of_original=60)
+                self.fg_img_path, resize_percent_of_original=80)
         else:
             print('The file does not exist')
             # Todo: Add handling for cases when the file doesn't exist (e.g., display a placeholder)
@@ -234,9 +236,9 @@ if __name__ == "__main__":
     root.geometry('500x500')
     root.configure(background='white')
     frame = tk.Frame(root, background='yellow')
-    frame.pack(expand=True, fill='both')
+    frame.pack(expand=True,fill='both')
     circle_icon = CircleImgIcon(master=frame,
-                                width=128, height=128,
+                                # width=128, height=128,
                                 fg_img_path=r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\dumbell.png')
 
     circle_icon.pack(padx=10, pady=10,

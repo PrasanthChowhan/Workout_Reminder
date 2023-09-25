@@ -1,8 +1,9 @@
 import ttkbootstrap as ttkb
 from tkinter import Canvas
 import tkinter as tk
+from tkinter import ttk
 from tkinter import font
-from src.ImageFunctions import MyImage
+from src.ImageFunctions import MyImage,CircleImgIcon
 from PIL import Image
 
 
@@ -109,18 +110,9 @@ class BottomContainer(ttkb.Frame):
                                 bootstyle='black',
                                 font=self.h1).pack(fill='x', pady=6)
 
-        visuals_frame = ttkb.Frame(self, bootstyle='primary')
-        visuals_frame.pack(fill='x')
+        VisualFrame(parent=self).pack(fill='x')
 
-        icon = ttkb.Label(master=visuals_frame, text='Icon-1',
-                          bootstyle='inverse-primary')
-        icon.pack(side='left', expand=True, fill='both', pady=10, padx=10)
-        icon2 = ttkb.Label(master=visuals_frame, text='Icon-2',
-                           bootstyle='inverse-primary')
-        icon2.pack(side='left', expand=True, fill='both', pady=10, padx=10)
-        icon3 = ttkb.Label(master=visuals_frame, text='Icon-3',
-                           bootstyle='inverse-primary')
-        icon3.pack(side='left', expand=True, fill='both', pady=10, padx=10)
+        
 
         # Description Frame
         DescriptionFrame(parent=self).pack(expand=True, fill='both', pady=5)
@@ -135,8 +127,31 @@ class BottomContainer(ttkb.Frame):
         self.h2 = font.Font(family='Helvatica', size=15)
         return {'h1': self.h1,
                 'h2': self.h2}
+class IconStructure(tk.Frame):
+    def __init__(self,master,text,path,*args,**kwargs):
+        super().__init__(master=master, # TODO change this
+                         *args, **kwargs)
+        self.configure(bg = '#4582ec')
+        icon1 = CircleImgIcon(master=self,width=30,height=30,fg_img_path=path)
+        icon1.pack()
+        icon1.configure(background = '#4582ec')
+        ttk.Label(master=self,text = text).pack(pady=(5,0))
 
-
+class VisualFrame(ttkb.Frame):
+    def __init__(self, parent, *args, **kwargs):
+        super().__init__(master=parent,
+                         bootstyle='primary',
+                         *args, **kwargs)
+        path = r"resources\icons\dumbell.png"
+        icon = IconStructure(master=self,text='3 x 24',path=path)
+        icon.pack(side='left', expand=True, fill='both', pady=10, padx=10)
+        
+        icon2 = ttkb.Label(master=self, text='Icon-2',
+                           bootstyle='inverse-primary')
+        icon2.pack(side='left', expand=True, fill='both', pady=10, padx=10)
+        icon3 = ttkb.Label(master=self, text='Icon-3',
+                           bootstyle='inverse-primary')
+        icon3.pack(side='left', expand=True, fill='both', pady=10, padx=10)
 class DescriptionFrame(ttkb.Frame):
     def __init__(self, parent, *args, **kwargs):
         super().__init__(master=parent,
@@ -173,6 +188,5 @@ class ActionButtonsFrame(ttkb.Frame):
 if __name__ == '__main__':
     root = ttkb.Window()
     # root.config(bg='blue')
-
     VerticalGui()
     root.mainloop()

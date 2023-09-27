@@ -1,9 +1,18 @@
 from PIL import Image, ImageDraw, ImageTk, ImageEnhance, ImageChops
 import tkinter as tk
+from src.utils.CustomClasses import CanvasWithParentBackground
 from dataclasses import dataclass
 import os
-import threading
-
+import threading,time
+def timing_decorator(func):
+            def wrapper(*args, **kwargs):
+                start_time = time.time()
+                result = func(*args, **kwargs)
+                end_time = time.time()
+                print(
+                    f"{func.__name__} took {end_time - start_time:.2f} seconds to execute.")
+                return result
+            return wrapper
 
 @dataclass(frozen=True)
 class MyImage:
@@ -141,27 +150,112 @@ class MyImage:
     def to_tk(Image):
         return ImageTk.PhotoImage(Image)
 
+class CanvasWithShape(CanvasWithParentBackground):
+    def __init__(self,master, shape = 'rounded_rectangle' ,width=None,height=None, **kwargs):
+        '''
+        when height and width are not given instances cannot access the tags as .bind doesn't return anything
+        '''
 
-class CircleImgIcon(tk.Canvas):
-    def __init__(self, master,width= None,height=None, fg_img_path='', animate=True, *args, **kwargs):
+        super().__init__(master=master)
+
+       
+        self.width = width
+        self.height = height
+        self.shape = shape    
+        self.kwargs = kwargs  
+       
+        if width is None and height is None:
+            self.bind('<Configure>', self.create_shape) # doesn't return anything
+        else:
+            
+            self.create_shape()
+    @timing_decorator
+    def create_shape(self,event=None):
+        # not using .winfo_width because sometimes it works and sometimes it doesn't. 
+        # -> I don't know how to use it properly
+        if event: 
+            # removing any widgets or canvas present before creating them again.
+            self.delete('all')
+            for slave in self.pack_slaves():
+                slave.destroy()
+
+            self.width = event.width
+            self.height = event.height 
+
+        self.my_image= MyImage(width=self.width, height=self.height)
+        self.background_img = self.my_image.create(
+            self.shape, **self.kwargs)
+
+        self.copied_original_imag = self.background_img.copy()
+        self.background_img_tk = ImageTk.PhotoImage(self.background_img)
+
+        self.create_image(self.width / 2, self.height / 2,
+                                    image=self.background_img_tk,tags= ('background'))
         
-        color_behind_canvas = master.cget('background')
-        print(color_behind_canvas)
-        super().__init__(master=master, background=color_behind_canvas,width=width,height=height,
-                         bd=0, highlightthickness=0, relief='ridge', *args, **kwargs)
+        self.description_heading_frame = tk.Frame(
+            master=self, 
+            # background = self.color,
+            )
+        self.description_heading_frame.pack(
+            fill='x',  pady=(10, 0))
+        
+        # Advantages
+        description_heading = tk.Label(foreground='Black',
+                                       master=self.description_heading_frame,
+                                    #    background=,
+                                       text="Advantages")
+        description_heading.pack(side='left', anchor='nw',  padx=5)
+
+        # i Icon
+        i_icon_label = tk.Label(master=self.description_heading_frame, text='i')
+        i_icon_label.pack(side='right', anchor='ne')
+        
+        
+        # # # TExt area
+        # text_frame = tk.Frame(master=self,background='pink')
+        # text_frame.pack(expand=True,fill='both')
+        # sample text 
+        text = """
+Burns calories and fat
+Strengthens muscles and bones
+Improves posture and balance
+Enhances cardiovascular health
+Prevents injuries and pain"""
+
+        bullet_points = "• " + "\n• ".join(text.strip().split('\n'))
+
+   
+
+        # tk.Text(self,width= 200, height=150,background='red').pack()
+
+        text_str = 'sonme text with bullet point \n this is second line'
+
+        text_item = self.create_text(self.width/2,self.height/2, text= bullet_points,width=self.width,anchor=tk.CENTER,font=('roboto',12),state=tk.DISABLED)
+
+       
+
+        
+
+class CircleImgIcon(CanvasWithParentBackground):
+    def __init__(self, master, width=None, height=None, fg_img_path='',
+
+                 animate=True, *args, **kwargs):
+        super().__init__(master=master,
+                         width=width, height=height,
+                         *args, **kwargs)
 
         self.fg_img_path = fg_img_path
         self.width = None
         self.height = None
         self.animate = animate
 
-        if width is  None and height is None:
+        if width is None and height is None:
             self.bind('<Configure>', self.create_bg_and_fg)
         else:
             self.width = width
             self.height = height
             self.create_bg_and_fg()
-
+    @timing_decorator
     def create_bg_and_fg(self, event=None):
         if event:
             self.width = event.width
@@ -176,14 +270,14 @@ class CircleImgIcon(tk.Canvas):
 
         self.copied_original_imag = self.background_img.copy()
         self.background_img_tk = ImageTk.PhotoImage(self.background_img)
-        print(f'creatiing background image with width : {self.width}')
+
         self.create_image(self.width / 2, self.height / 2,
                           image=self.background_img_tk, tag='background')
 
         # Foreground image
         if os.path.exists(self.fg_img_path):
             self.resized_foreground_img = self.my_image.resize_image(
-                self.fg_img_path, resize_percent_of_original=80)
+                self.fg_img_path, resize_percent_of_original=75)
         else:
             print('The file does not exist')
             # Todo: Add handling for cases when the file doesn't exist (e.g., display a placeholder)
@@ -201,25 +295,16 @@ class CircleImgIcon(tk.Canvas):
 
         self.animate_number = 1  # Counter (may need improvement)
 
-    def setup(self, event=None):
-        if event:
-
-            print('Setting up width...', event.width)
-            print('Setting up height...', event.height)
-            self.width = event.width
-            self.height = event.height
-            return 'hello world'
-
     def threader(self, func, *args):
         """Start a new thread to execute a function."""
-        print('Threading...', func.__name__)
+        # print('Threading...', func.__name__)
         threading.Thread(target=func, daemon=True).start()
 
     def change_color(self):
         """Change the color of the background shape on hover."""
         enhancer = ImageEnhance.Brightness(self.background_img)
         enhanced_img = enhancer.enhance(.8)
-        self.move('background', 10, 0)
+        # self.move('background', 10, 0)
 
         self.enhanced_img_tk = ImageTk.PhotoImage(enhanced_img)
         self.itemconfig('background', image=self.enhanced_img_tk)
@@ -236,12 +321,15 @@ if __name__ == "__main__":
     root.geometry('500x500')
     root.configure(background='white')
     frame = tk.Frame(root, background='yellow')
-    frame.pack(expand=True,fill='both')
-    circle_icon = CircleImgIcon(master=frame,
-                                # width=128, height=128,
-                                fg_img_path=r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\dumbell.png')
+    frame.pack(expand=True, fill='both')
+    # circle_icon = CircleImgIcon(master=frame,
+    #                             # width=128, height=128,
+    #                             fg_img_path=r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\dumbell.png')
 
-    circle_icon.pack(padx=10, pady=10,
+    # circle_icon.pack(padx=10, pady=10,
+    #                  expand=True, fill='both'
+    #                  )
+    CanvasWithShape(root,shape='rounded_rectangle',fill =(104, 0, 255,30),radius = 15).pack(padx=10, pady=10,
                      expand=True, fill='both'
                      )
 

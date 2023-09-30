@@ -70,8 +70,11 @@ class SetWindowPosition:
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
         # window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
-    @staticmethod
+    @staticmethod 
     def for_ctk(window, position=(15, 25, 'se')):
+        '''
+        # ignore this not yet implemented
+        '''
         print('pending work setwindow position for ctk')
         window.update()  # Actualize geometry
         anchor = position[-1]
@@ -138,7 +141,7 @@ class BottomContainer(tk.Frame):
         self.h3 = None
 
         # fonts settings
-        self._setup()
+        self.setup()
 
         text_frame = tk.Label(self,
                               text='Push-up',
@@ -155,7 +158,7 @@ class BottomContainer(tk.Frame):
         # Action Frame
         ActionButtonsFrame(parent=self).pack(fill='x', pady=5)
 
-    def _setup(self):
+    def setup(self):
         self.h1 = font.Font(
             family='Roboto', size=15, weight='bold')
         self.h2 = font.Font(family='Helvatica', size=15)

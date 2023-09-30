@@ -299,7 +299,7 @@ class CircleImgIcon(CanvasWithParentBackground):
         """Start a new thread to execute a function."""
         # print('Threading...', func.__name__)
         threading.Thread(target=func, daemon=True).start()
-
+    @timing_decorator
     def change_color(self):
         """Change the color of the background shape on hover."""
         enhancer = ImageEnhance.Brightness(self.background_img)

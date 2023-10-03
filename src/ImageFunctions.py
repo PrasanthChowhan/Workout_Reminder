@@ -3,16 +3,19 @@ import tkinter as tk
 from src.utils.CustomClasses import CanvasWithParentBackground
 from dataclasses import dataclass
 import os
-import threading,time
+import threading
+import time
+
+
 def timing_decorator(func):
-            def wrapper(*args, **kwargs):
-                start_time = time.time()
-                result = func(*args, **kwargs)
-                end_time = time.time()
-                print(
-                    f"{func.__name__} took {end_time - start_time:.2f} seconds to execute.")
-                return result
-            return wrapper
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        # print(f"{func.__name__} took {end_time - start_time:.2f} seconds to execute.")
+        return result
+    return wrapper
+
 
 @dataclass(frozen=True)
 class MyImage:
@@ -150,39 +153,41 @@ class MyImage:
     def to_tk(Image):
         return ImageTk.PhotoImage(Image)
 
+
 class CanvasWithShape(CanvasWithParentBackground):
-    def __init__(self,master, shape = 'rounded_rectangle' ,width=None,height=None, **kwargs):
+    def __init__(self, master, shape='rounded_rectangle', width=None, height=None, **kwargs):
         '''
         when height and width are not given instances cannot access the tags as .bind doesn't return anything
         '''
 
         super().__init__(master=master)
 
-       
         self.width = width
         self.height = height
-        self.shape = shape    
-        self.kwargs = kwargs  
-       
+        self.shape = shape
+        self.kwargs = kwargs
+
         if width is None and height is None:
-            self.bind('<Configure>', self.create_shape) # doesn't return anything
+            # doesn't return anything
+            self.bind('<Configure>', self.create_shape)
         else:
-            
+
             self.create_shape()
+
     @timing_decorator
-    def create_shape(self,event=None):
-        # not using .winfo_width because sometimes it works and sometimes it doesn't. 
+    def create_shape(self, event=None):
+        # not using .winfo_width because sometimes it works and sometimes it doesn't.
         # -> I don't know how to use it properly
-        if event: 
+        if event:
             # removing any widgets or canvas present before creating them again.
             self.delete('all')
             for slave in self.pack_slaves():
                 slave.destroy()
 
             self.width = event.width
-            self.height = event.height 
+            self.height = event.height
 
-        self.my_image= MyImage(width=self.width, height=self.height)
+        self.my_image = MyImage(width=self.width, height=self.height)
         self.background_img = self.my_image.create(
             self.shape, **self.kwargs)
 
@@ -190,31 +195,31 @@ class CanvasWithShape(CanvasWithParentBackground):
         self.background_img_tk = ImageTk.PhotoImage(self.background_img)
 
         self.create_image(self.width / 2, self.height / 2,
-                                    image=self.background_img_tk,tags= ('background'))
-        
+                          image=self.background_img_tk, tags=('background'))
+
         self.description_heading_frame = tk.Frame(
-            master=self, 
+            master=self,
             # background = self.color,
-            )
+        )
         self.description_heading_frame.pack(
             fill='x',  pady=(10, 0))
-        
+
         # Advantages
         description_heading = tk.Label(foreground='Black',
                                        master=self.description_heading_frame,
-                                    #    background=,
+                                       #    background=,
                                        text="Advantages")
         description_heading.pack(side='left', anchor='nw',  padx=5)
 
         # i Icon
-        i_icon_label = tk.Label(master=self.description_heading_frame, text='i')
+        i_icon_label = tk.Label(
+            master=self.description_heading_frame, text='i')
         i_icon_label.pack(side='right', anchor='ne')
-        
-        
+
         # # # TExt area
         # text_frame = tk.Frame(master=self,background='pink')
         # text_frame.pack(expand=True,fill='both')
-        # sample text 
+        # sample text
         text = """
 Burns calories and fat
 Strengthens muscles and bones
@@ -224,17 +229,13 @@ Prevents injuries and pain"""
 
         bullet_points = "• " + "\n• ".join(text.strip().split('\n'))
 
-   
-
         # tk.Text(self,width= 200, height=150,background='red').pack()
 
         text_str = 'sonme text with bullet point \n this is second line'
 
-        text_item = self.create_text(self.width/2,self.height/2, text= bullet_points,width=self.width,anchor=tk.CENTER,font=('roboto',12),state=tk.DISABLED)
+        text_item = self.create_text(self.width/2, self.height/2, text=bullet_points,
+                                     width=self.width, anchor=tk.CENTER, font=('roboto', 12), state=tk.DISABLED)
 
-       
-
-        
 
 class CircleImgIcon(CanvasWithParentBackground):
     def __init__(self, master, width=None, height=None, fg_img_path='',
@@ -255,6 +256,7 @@ class CircleImgIcon(CanvasWithParentBackground):
             self.width = width
             self.height = height
             self.create_bg_and_fg()
+
     @timing_decorator
     def create_bg_and_fg(self, event=None):
         if event:
@@ -299,6 +301,7 @@ class CircleImgIcon(CanvasWithParentBackground):
         """Start a new thread to execute a function."""
         # print('Threading...', func.__name__)
         threading.Thread(target=func, daemon=True).start()
+
     @timing_decorator
     def change_color(self):
         """Change the color of the background shape on hover."""
@@ -329,8 +332,8 @@ if __name__ == "__main__":
     # circle_icon.pack(padx=10, pady=10,
     #                  expand=True, fill='both'
     #                  )
-    CanvasWithShape(root,shape='rounded_rectangle',fill =(104, 0, 255,30),radius = 15).pack(padx=10, pady=10,
-                     expand=True, fill='both'
-                     )
+    CanvasWithShape(root, shape='rounded_rectangle', fill=(104, 0, 255, 30), radius=15).pack(padx=10, pady=10,
+                                                                                             expand=True, fill='both'
+                                                                                             )
 
     root.mainloop()

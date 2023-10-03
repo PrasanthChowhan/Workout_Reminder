@@ -14,14 +14,15 @@ class VerticalGui(tk.Tk):
         super().__init__(
 
         )
-        self.num = 1
+        self.initialise()
+        # self.num = 1
         self.title("HIDE THIS")
         # self.resizable(False, False)
         # self.overrideredirect(True)
         # self.withdraw()
         self.geometry("300x650")
         s = ttk.Style()
-
+        
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
 
         # notificaiton configuration
@@ -31,7 +32,13 @@ class VerticalGui(tk.Tk):
 
         ImageFrame(parent=self).grid(row=0, column=0, sticky='news')
         BottomContainer(parent=self, padx=10).grid(
-            row=1, column=0, sticky='news', )
+            row=1, column=0, sticky='news' )
+    def initialise(self):
+        # self.exercise_name = exercise_name
+        # self.difficulty = difficulty
+        # self.muscle = muscle
+        # self.equipment = equipment
+        pass
 
 
 class SetWindowPosition:
@@ -217,12 +224,18 @@ class ActionButtonsFrame(tk.Frame):
         # buttons
         later_button = ttk.Button(self, text='Later')
         later_button.pack(side='left', expand=True, fill='both')
-        done_button = ttk.Button(self, text='I Did It',)
+        done_button = ttk.Button(self, text='I Did It',command=self.destroyed)
         done_button.pack(side='left', expand=True, fill='both')
+        
+    def destroyed(self) -> None:
+        root = self.nametowidget('.')
+        # root.geometry('1000x1000')
+        root.destroy()
 
 
 if __name__ == '__main__':
     # root = ttkb.Window()
     # root.config(bg='blue')
-    VerticalGui().mainloop()
+    a=VerticalGui()
+    a.mainloop()
     # root.mainloop()

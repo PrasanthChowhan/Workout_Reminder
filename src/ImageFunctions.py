@@ -12,7 +12,7 @@ def timing_decorator(func):
         start_time = time.time()
         result = func(*args, **kwargs)
         end_time = time.time()
-        # print(f"{func.__name__} took {end_time - start_time:.2f} seconds to execute.")
+        print(f"{func.__name__} took {end_time - start_time:.2f} seconds to execute.")
         return result
     return wrapper
 
@@ -174,7 +174,7 @@ class CanvasWithShape(CanvasWithParentBackground):
 
             self.create_shape()
 
-    @timing_decorator
+    # @timing_decorator
     def create_shape(self, event=None):
         # not using .winfo_width because sometimes it works and sometimes it doesn't.
         # -> I don't know how to use it properly
@@ -243,6 +243,7 @@ class CircleImgIcon(CanvasWithParentBackground):
                  animate=True, *args, **kwargs):
         super().__init__(master=master,
                          width=width, height=height,
+                        #  background='yellow',
                          *args, **kwargs)
 
         self.fg_img_path = fg_img_path
@@ -257,7 +258,7 @@ class CircleImgIcon(CanvasWithParentBackground):
             self.height = height
             self.create_bg_and_fg()
 
-    @timing_decorator
+    # @timing_decorator
     def create_bg_and_fg(self, event=None):
         if event:
             self.width = event.width
@@ -279,7 +280,7 @@ class CircleImgIcon(CanvasWithParentBackground):
         # Foreground image
         if os.path.exists(self.fg_img_path):
             self.resized_foreground_img = self.my_image.resize_image(
-                self.fg_img_path, resize_percent_of_original=75)
+                self.fg_img_path, resize_percent_of_original=90)
         else:
             print('The file does not exist')
             # Todo: Add handling for cases when the file doesn't exist (e.g., display a placeholder)
@@ -302,7 +303,7 @@ class CircleImgIcon(CanvasWithParentBackground):
         # print('Threading...', func.__name__)
         threading.Thread(target=func, daemon=True).start()
 
-    @timing_decorator
+    # @timing_decorator
     def change_color(self):
         """Change the color of the background shape on hover."""
         enhancer = ImageEnhance.Brightness(self.background_img)
@@ -325,15 +326,15 @@ if __name__ == "__main__":
     root.configure(background='white')
     frame = tk.Frame(root, background='yellow')
     frame.pack(expand=True, fill='both')
-    # circle_icon = CircleImgIcon(master=frame,
-    #                             # width=128, height=128,
-    #                             fg_img_path=r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\dumbell.png')
+    circle_icon = CircleImgIcon(master=frame,
+                                # width=128, height=128,
+                                fg_img_path=r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\dumbell.png')
 
-    # circle_icon.pack(padx=10, pady=10,
-    #                  expand=True, fill='both'
-    #                  )
-    CanvasWithShape(root, shape='rounded_rectangle', fill=(104, 0, 255, 30), radius=15).pack(padx=10, pady=10,
-                                                                                             expand=True, fill='both'
-                                                                                             )
+    circle_icon.pack(padx=10, pady=10,
+                     expand=True, fill='both'
+                     )
+    # CanvasWithShape(root, shape='rounded_rectangle', fill=(104, 0, 255, 30), radius=15).pack(padx=10, pady=10,
+    #                                                                                          expand=True, fill='both'
+    #                                                                                          )
 
     root.mainloop()

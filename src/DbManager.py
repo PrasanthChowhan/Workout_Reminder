@@ -1,4 +1,4 @@
-import sqlite3
+import sqlite3,os,pprint
 import yaml
 from dataclasses import dataclass
 from datetime import datetime
@@ -62,7 +62,15 @@ class DataSelector:
             return exercises_matching_condition  # returns all matching
 
 
+
 class ExerciseLog:
+    '''
+    used for Gui 
+    - create a new db if it doesn't exist
+    - create the table in the following format
+    - methods manipulate the dictionary of this class
+    
+    '''
     def __init__(self):
         current_datetime = datetime.now()
         self.log_entry = {
@@ -97,21 +105,36 @@ class ExerciseLog:
 
 
 class DbManager:
-    def __init__(self, config_file_path, exercise_database_path):
+    def __init__(self):
         # initialize
-        self.config_file_path = config_file_path
-        self.exercise_database_path = exercise_database_path
+        self.config_file_path       = SETTINGS_YAML_PATH
+        self.exercise_database_path = EXERCISE_DB_PATH
+        self.exercise_log_path      = EXERCISE_LOG_PATH
 
-    def give_me_a_exercise(self):
-        # getting settings from the file
-        user_preference_dict = ConfigReader(
-            self.config_file_path).read_config_file()
+    def give_me_a_exercise(self) -> dict:
+        '''
+        Returns a dictionary of exercise based on the settings and last exercised value
+        '''
+
+
+        # get user preference from settings.yaml
+        user_preference_dict = ConfigReader(self.config_file_path).read_config_file()
+
+        if user_preference_dict['muscle'] == 'default': 
+            # if default cycle through exercises
+
+            if not os.path.exists(self.exercise_log_path): 
+                # if log db doesn't exist, program launched for the first time
+                # so add random exercise
+                user_preference_dict['muscle'] = 'chest' 
+
+            else:
+                user_preference_dict['muscle'] = ExerciseDatabase().next_muscle()
 
         # process the settings which is dict and convert as a query for searching
         user_preference_for_query = self.process_settings(user_preference_dict)
 
-        exercise = DataSelector(self.exercise_database_path, 'Exercise', user_preference_for_query
-                                ).select_matching(only_one=True, random=True)
+        exercise = ExerciseDatabase().select_matching(user_preference_for_query,only_one=True, random=True)
         return exercise
 
     def process_settings(self, setting_dict) -> list:
@@ -196,28 +219,46 @@ class DbManager:
                 # Close the database connection if it was created here
                 connection.close()
 
+class ExerciseDatabase:
+    def __init__(self):
+        self.exercise_db_path = EXERCISE_DB_PATH
+        self.exercise_log_path = EXERCISE_LOG_PATH
+        self.exercise_log_table_name = EXERCISE_LOG_TABLE_NAME
 
+    def next_muscle(self)-> str:
+        '''Returns the next exercise
+        - First check the log_database for the last exercise 
+        - Second from the ExerciseDatabase get the name of next muscle group
+        
+        Return: name of next muscle group
+        '''
+        # check what was the last muscle targetted
+        last_log_entry = SqliteDefs.get_latest_row_as_dict(self.exercise_log_path,self.exercise_log_table_name)
+        last_muscle_targetted = last_log_entry['muscle']
+        # Id of last muscle
+        last_muscle_targetted_dict= SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,'Muscles',[f"muscle = '{last_muscle_targetted}'"])
+        
+        # last_muscle_targetted_dict = 
+        last_muscle_id = last_muscle_targetted_dict[0]['muscle_id'] # list of dictionaries so to remove the list
+    
+        next_muscle_dict = SqliteDefs.get_next_entry(self.exercise_db_path,'Muscles','muscle_id',last_muscle_id)
+        print('next_muscle_dicct',next_muscle_dict)
+        return next_muscle_dict['muscle']
+
+    def select_matching(self,query_conditions, only_one=False, random=False) -> dict:
+        exercises_matching_condition = SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,
+                                                                        'Exercise',
+                                                                        query_conditions)
+        if only_one and exercises_matching_condition and not random:
+            return exercises_matching_condition[0]  # return first element
+        elif only_one and random and exercises_matching_condition:  # return random
+            # [0] because retrieve_data_as_dict gives list of dicts
+            return rnd.choices(exercises_matching_condition)[0]
+        else:
+            return exercises_matching_condition  # returns all matching
 if __name__ == '__main__':
-    # UserLogs().create_db()
-    activity = {
-        'date': '2023-09-18',
-                'month': 'September',
-                'year': 2023,
-                'time': '08:00 AM',
-                'day': 'Monday',
-                'name': 'push-up',
-                'muscle': 'Chest',
-                'difficulty': 'Intermediate',
-                'equipment': 'Dumbbells',
-                'done': 'Yessdfadfada',
-                'reason': 'Regular workout',
-    }
-    # UserLogs().insert_data_into_table('logger.sqlite', 'activity', activity)
-    # DbManager.insert_data_into_table('newlogger.sqlite', 'activity', activity)
-    print(DicForDatabase().get_dict())
-
-    # exercise = DbManager('data\settings.yaml',
-    #           'data\exercise_database.sqlite').give_me_a_exercise()
+   
+    exercise = DbManager().give_me_a_exercise()
     # pprint.pprint(exercise)
 
     # ➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖

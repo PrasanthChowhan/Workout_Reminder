@@ -241,6 +241,159 @@ class SqliteDefs:
                 # Close the database connection if it was created here
                 connection.close()
             
+    @staticmethod
+    def get_latest_row_as_dict(database_or_cursor, table_name):
+        """
+        Retrieve the latest added row from an SQLite database table and return it as a dictionary.
+
+        Args:
+            database_path (str): The path to the SQLite database file.
+            table_name (str): The name of the table to query.
+
+        Returns:
+            dict: A dictionary representing the latest added row with keys as column names.
+                Returns an empty dictionary if no rows are found.
+        """
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Query to retrieve the latest added row
+            query = f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 1"
+
+            # Execute the query
+            cursor.execute(query)
+
+            # Fetch the latest added row
+            latest_row = cursor.fetchone()
+
+            if latest_row:
+                # Get the column names from the table description
+                column_names = [column[0] for column in cursor.description]
+
+                # Create a dictionary with column names as keys and row values as values
+                latest_row_dict = dict(zip(column_names, latest_row))
+            else:
+                latest_row_dict = {}
+
+            return latest_row_dict
+
+        except sqlite3.Error as e:
+            print(f"Error retrieving latest row: {e}")
+            return {}
+
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
+    @staticmethod
+ 
+    def count_entries_in_table(database_or_cursor, table_name):
+        """
+        Count the number of entries in an SQLite database table.
+
+        Args:
+            database_path (str): The path to the SQLite database file.
+            table_name (str): The name of the table to count entries in.
+
+        Returns:
+            int: The number of entries in the specified table.
+                Returns 0 if the table is empty or an error occurs.
+        """
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Query to count the number of entries in the table
+            query = f"SELECT COUNT(*) FROM {table_name}"
+
+            # Execute the query
+            cursor.execute(query)
+
+            # Fetch the count value
+            count = cursor.fetchone()[0]
+
+            return count
+
+        except sqlite3.Error as e:
+            print(f"Error counting entries: {e}")
+            return 0
+
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
+    @staticmethod
+    def get_next_entry(database_or_cursor, table_name,id_column_name, current_row_id):
+        """
+        Get the next entry in a table, looping back to the first entry if the last entry is reached.
+
+        Args:
+            database_path (str): The path to the SQLite database file.
+            table_name (str): The name of the table to retrieve entries from.
+            current_row_id (int): The ID of the current row.
+
+        Returns:
+            dict: A dictionary representing the next entry in the table.
+                Returns None if an error occurs or if the current row ID is invalid.
+        """
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Get the maximum row ID in the table
+            cursor.execute(f"SELECT MAX({id_column_name}) FROM {table_name}")
+            max_row_id = cursor.fetchone()[0]
+        
+            if current_row_id is None or current_row_id < 1:
+                current_row_id = 1  # Default to the first row
+
+            # Determine the next row ID, looping back to 1 if the last row is reached
+            next_row_id = (current_row_id % max_row_id) + 1
+            
+            # Retrieve the next entry based on the next row ID
+            cursor.execute(f"SELECT * FROM {table_name} WHERE {id_column_name}=?", (next_row_id,))
+            next_entry = cursor.fetchone()
+
+            # If no entry is found, return None
+            if next_entry is None:
+                return None
+
+            # Create a dictionary representation of the entry with column names as keys
+            column_names = [description[0] for description in cursor.description]
+            next_entry_dict = dict(zip(column_names, next_entry))
+
+            return next_entry_dict
+
+        except sqlite3.Error as e:
+            print(f"Error retrieving next entry: {e}")
+            return None
+
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
 
 
 if __name__ == '__main__':

@@ -10,7 +10,7 @@ from PIL import Image, ImageTk
 
 default_information = {'name': 'Default_Push-up',
                        'difficulty': 'Beginner',
-                       'muscle_targetted': 'Chest',
+                       'muscle': 'Chest',
                        'equipment': 'Bodyweight'}
 
 
@@ -21,6 +21,7 @@ class NotificationGui(tk.Tk):
         self.resizable(False, False)
         self.overrideredirect(True)
         self.geometry("400x250")
+        self.attributes('-topmost',True)
         s = ttk.Style()
 
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
@@ -199,7 +200,7 @@ class VisualFrame(tk.Frame):
                          *args, **kwargs)
 
         # values of recieved dict and icon name
-        icons_list = ['difficulty', 'muscle_targetted', 'equipment']
+        icons_list = ['difficulty', 'muscle', 'equipment']
 
         for icon_name in icons_list:
             path = f"resources\icons\{icon_name}.png"

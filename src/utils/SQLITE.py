@@ -143,7 +143,104 @@ class SqliteDefs:
         )
         ''')
 
+    @staticmethod
+    def retrieve_data(database_or_cursor, table_name, conditions):
+        """
+        Retrieve data from an SQLite database based on given conditions.
+
+        Args:
+            database_or_cursor (str or sqlite3.Cursor): Either a path to the SQLite
+                database file or an existing cursor object.
+            table_name (str): The name of the table to query.
+            conditions (list): A list of SQL conditions to filter the data.
+
+        Returns:
+            list: A list of rows that match the given conditions.
+
+        Example:
+            conditions = ["column1 = 'value'", "column2 > 10"]
+            data = retrieve_data("mydatabase.db", "mytable", conditions)
+        """
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Construct the SQL query with the provided conditions
+            query = f"SELECT * FROM {table_name} WHERE {' AND '.join(conditions)}"
+
+            # Execute the query
+            cursor.execute(query)
+
+            # Fetch all rows that match the conditions
+            rows = cursor.fetchall()
+
+            return rows
+        except sqlite3.Error as e:
+            print(f"Error retrieving data: {e}")
+            return []
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
+    @staticmethod
+    def retrieve_data_as_dict(database_or_cursor, table_name, conditions):
+        """
+    Retrieve data from an SQLite database table as a list of dictionaries based on specified conditions.
+
+    Args:
+        database_or_cursor: Either a database file path (str) or an existing database cursor (sqlite3.Cursor).
+        table_name (str): The name of the table to retrieve data from.
+        conditions (list): A list of strings specifying conditions to filter the data (e.g., ["column1 = 'value'", "column2 > 42"]).
+
+    Returns:
+        list: A list of dictionaries, where each dictionary represents a row of data. 
+              Column names are used as keys, and row values are used as values in the dictionaries.
+
+    Raises:
+        ValueError: If an invalid database_or_cursor argument is provided."""
         
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Construct the SQL query with the provided conditions
+            query = f"SELECT * FROM {table_name} WHERE {' AND '.join(conditions)}"
+
+            # Execute the query
+            cursor.execute(query)
+
+            # Fetch all rows that match the conditions
+            rows = cursor.fetchall()
+            # Get the column names from the table description
+            column_names = [column[0] for column in cursor.description]
+            
+            # Create a list of dictionaries, where each dictionary represents a row
+            data_as_dict = [dict(zip(column_names, row)) for row in rows]
+
+
+            return data_as_dict
+        except sqlite3.Error as e:
+            print(f"Error retrieving data: {e}")
+            return []
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
+            
 
 
 if __name__ == '__main__':

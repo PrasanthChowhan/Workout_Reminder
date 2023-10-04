@@ -1,0 +1,5 @@
+difficulty : beginner # beginner, intermediate, advanced
+equipment : stretches # bodyweight,band,stretches,yoga
+muscle : chest
+# target_specific_muscle : None
+# show_strectches : false

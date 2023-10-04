@@ -8,7 +8,7 @@ from DbManager import DbManager
     
 def schedule_gui():
     exercise = DbManager('data\settings.yaml', 'data\exercise_database.sqlite').give_me_a_exercise()
-    print(exercise)
+    # print(exercise)
     root = NotificationGui(exercise_dict=exercise)
     print(time.ctime())
    

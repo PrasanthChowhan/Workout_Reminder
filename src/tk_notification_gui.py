@@ -1,4 +1,4 @@
-import time
+from datetime import datetime
 
 from tkinter import Canvas
 import tkinter as tk
@@ -7,6 +7,7 @@ from tkinter import font
 from src.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
 from src.utils.CustomClasses import FrameWithParentBackground, LabelWithParentBackground
 from PIL import Image, ImageTk
+from DbManager import ExerciseLog
 
 default_information = {'name': 'Default_Push-up',
                        'difficulty': 'Beginner',
@@ -15,33 +16,27 @@ default_information = {'name': 'Default_Push-up',
 
 
 class NotificationGui(tk.Tk):
-    def __init__(self, exercise_dict=default_information):
+    def __init__(self, exercise_dict:dict=default_information):
         super().__init__()
         self.title("HIDE THIS")
         self.resizable(False, False)
         self.overrideredirect(True)
         self.geometry("400x250")
-        self.attributes('-topmost',True)
+        self.attributes('-topmost', True)
         s = ttk.Style()
 
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
 
-        # notificaiton configuration
-        self.rowconfigure(0, weight=1, uniform='a')
-        self.rowconfigure(1, weight=2, uniform='a')
-        self.columnconfigure(0, weight=1, uniform='a')
+        # # notificaiton configuration
+        # self.rowconfigure(0, weight=1, uniform='a')
+        # self.rowconfigure(1, weight=2, uniform='a')
+        # self.columnconfigure(0, weight=1, uniform='a')
 
         # ImageFrame(parent=self).grid(row=0, column=0, sticky='news')
         BottomContainer(parent=self, padx=10, exercise_dict=exercise_dict).pack(
             expand=True, fill='both')
         # ).grid(row=1, column=0, sticky='news' )
 
-    def initialise(self):
-        # self.exercise_name = exercise_name
-        # self.difficulty = difficulty
-        # self.muscle_targetted = muscle_targetted
-        # self.equipment = equipment
-        pass
 
 
 class SetWindowPosition:
@@ -114,6 +109,8 @@ class SetWindowPosition:
         window.geometry(f"{xpos}+{ypos}")
         # window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
+# top section
+
 
 class ImageFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
@@ -138,6 +135,8 @@ class ImageFrame(tk.Frame):
         self.canvas.create_image(
             event.width/2, event.height/2, image=self.resized_image_tk)
 
+# bottom section
+
 
 class BottomContainer(tk.Frame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
@@ -153,7 +152,7 @@ class BottomContainer(tk.Frame):
         # fonts settings
         self.setup()
 
-        text_frame = tk.Label(self,
+        text_frame = ttk.Label(self,
                               text=exercise_dict['name'],
                               anchor='w',
                               #   background='magenta',
@@ -168,7 +167,7 @@ class BottomContainer(tk.Frame):
         # DescriptionFrame(parent=self).pack(expand=True, fill='both')
 
         # Action Frame
-        ActionButtonsFrame(parent=self).pack(
+        ActionButtonsFrame(parent=self, exercise_dict=exercise_dict).pack(
             side='bottom', fill='x', pady=10, ipady=5)
 
     def setup(self):
@@ -234,14 +233,38 @@ class DescriptionFrame(tk.Frame):
 
 
 class ActionButtonsFrame(tk.Frame):
-    def __init__(self, parent, *args, **kwargs):
+    def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
                          *args, **kwargs)
         # buttons
-        later_button = ttk.Button(self, text='Later')
+        later_button = ttk.Button(self, text='Later',
+                                  command=lambda: self.update_database(exercise_dict,is_completed = False))
         later_button.pack(side='left', expand=True, fill='both')
-        done_button = ttk.Button(self, text='I Did It', command=self.destroyed)
+        done_button = ttk.Button(
+            self, text='I Did It', command=lambda: self.update_database(exercise_dict,is_completed = True))
         done_button.pack(side='left', expand=True, fill='both')
+    # not using this fucntion
+    
+
+    def copyfrom(self,target_dict, source_dict):
+        for key, value in source_dict.items():
+            target_dict[key] = value
+
+
+    def update_database(self, exercise_dict,is_completed):
+        
+        exercise_log = ExerciseLog()
+
+        exercise_log.copy_values_from_dict(exercise_dict)
+
+        exercise_log.set_completed(is_completed)
+        # exercise_log.add_reason()
+        
+        exercise_log.add_entry_to_database()
+        print(exercise_log.get_log_entry())
+
+        # DbManager.insert_data_into_table(r'data\track.sqlite', 'User', exercise_log)
+        self.destroyed()
 
     def destroyed(self) -> None:
         root = self.nametowidget('.')

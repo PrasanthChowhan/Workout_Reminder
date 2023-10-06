@@ -5,8 +5,8 @@ from datetime import datetime
 import random as rnd
 # this is custom package will be present in learning respository
 # from python_learned.Sqlite import SqliteDefs
-from utils.SQLITE import SqliteDefs
-from utils.constants import *
+from src.utils.SQLITE import SqliteDefs
+from src.utils.constants import *
 
 '''
 What this module does 
@@ -237,7 +237,6 @@ class ExerciseDatabase:
         last_muscle_targetted = last_log_entry['muscle']
         # Id of last muscle
         last_muscle_targetted_dict= SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,'Muscles',[f"muscle = '{last_muscle_targetted}'"])
-        
         # last_muscle_targetted_dict = 
         last_muscle_id = last_muscle_targetted_dict[0]['muscle_id'] # list of dictionaries so to remove the list
     

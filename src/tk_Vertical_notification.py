@@ -4,8 +4,8 @@ from tkinter import Canvas
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font
-from src.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.utils.CustomClasses import FrameWithParentBackground, LabelWithParentBackground
+from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
+from src.Gui.components import FrameWithParentBackground, LabelWithParentBackground
 from PIL import Image, ImageTk
 
 default_information = {'name': 'Default_Push-up',

@@ -1,30 +1,33 @@
-from datetime import datetime
 
 from tkinter import Canvas
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font
-from src.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.utils.CustomClasses import FrameWithParentBackground, LabelWithParentBackground
-from PIL import Image, ImageTk
-from DbManager import ExerciseLog
+from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
+from src.Gui.components import FrameWithParentBackground, LabelWithParentBackground,ButtonWithParentBackground,LaterButton
+from src.DbManager import ExerciseLog
+from src.Gui.styles import configure_styles
+
+
+# import button_styling_and_functionality
 
 default_information = {'name': 'Default_Push-up',
-                       'difficulty': 'Beginner',
-                       'muscle': 'Chest',
-                       'equipment': 'Bodyweight'}
+                       'difficulty': 'beginner',
+                       'muscle': 'chest',
+                       'equipment': 'bodyweight'}
 
 
 class NotificationGui(tk.Tk):
     def __init__(self, exercise_dict:dict=default_information):
         super().__init__()
         self.title("HIDE THIS")
-        self.resizable(False, False)
-        self.overrideredirect(True)
+        # self.resizable(False, False)
+        # self.overrideredirect(True)
         self.geometry("400x250")
-        self.attributes('-topmost', True)
-        s = ttk.Style()
+        # self.attributes('-topmost', True)
+        # configure_styles()
 
+        
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
 
         # # notificaiton configuration
@@ -235,20 +238,25 @@ class DescriptionFrame(tk.Frame):
 class ActionButtonsFrame(tk.Frame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
+                        #  background='yellow',
                          *args, **kwargs)
-        # buttons
-        later_button = ttk.Button(self, text='Later',
-                                  command=lambda: self.update_database(exercise_dict,is_completed = False))
-        later_button.pack(side='left', expand=True, fill='both')
-        done_button = ttk.Button(
-            self, text='I Did It', command=lambda: self.update_database(exercise_dict,is_completed = True))
-        done_button.pack(side='left', expand=True, fill='both')
-    # not using this fucntion
-    
+        # using grid because LaterButton which is canvas isn't sharing equal space with pack 
+        self.rowconfigure(0,weight=1,uniform='a')
+        self.columnconfigure((0,1),weight=1,uniform='a')
 
-    def copyfrom(self,target_dict, source_dict):
-        for key, value in source_dict.items():
-            target_dict[key] = value
+        # Later buttons
+        self.update()
+        later_button = LaterButton(master=self, text='Later',
+                                  callback_func=lambda event: self.update_database(exercise_dict,is_completed = False))
+        # lambda event: because it is tag_binded to text
+        later_button.grid(row=0,column=0, sticky='news')
+
+
+        # done button
+        done_button = ttk.Button(
+            self,text='I Did It', command=lambda: self.update_database(exercise_dict,is_completed = True),style='did_it.TButton')
+        done_button.grid(row=0,column=1, sticky='news')
+
 
 
     def update_database(self, exercise_dict,is_completed):
@@ -263,7 +271,7 @@ class ActionButtonsFrame(tk.Frame):
         exercise_log.add_entry_to_database()
         print(exercise_log.get_log_entry())
 
-        # DbManager.insert_data_into_table(r'data\track.sqlite', 'User', exercise_log)
+
         self.destroyed()
 
     def destroyed(self) -> None:

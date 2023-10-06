@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw, ImageTk, ImageEnhance, ImageChops
 import tkinter as tk
-from src.utils.CustomClasses import CanvasWithParentBackground
+from src.Gui.components import CanvasWithParentBackground
 from dataclasses import dataclass
 import os
 import threading

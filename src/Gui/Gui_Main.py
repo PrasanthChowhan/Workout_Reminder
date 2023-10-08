@@ -25,9 +25,11 @@ class NotificationGui(tk.Tk):
         # self.overrideredirect(True)
         self.geometry("400x250")
         # self.attributes('-topmost', True)
-        # configure_styles()
+        configure_styles()
 
         
+        
+
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
 
         # # notificaiton configuration
@@ -171,7 +173,7 @@ class BottomContainer(tk.Frame):
 
         # Action Frame
         ActionButtonsFrame(parent=self, exercise_dict=exercise_dict).pack(
-            side='bottom', fill='x', pady=10, ipady=5)
+            side='bottom',fill='x',expand=True)
 
     def setup(self):
         self.h1 = font.Font(
@@ -236,26 +238,32 @@ class DescriptionFrame(tk.Frame):
 
 
 class ActionButtonsFrame(tk.Frame):
-    def __init__(self, parent, exercise_dict, *args, **kwargs):
+    def __init__(self, parent, exercise_dict, height= 30, *args, **kwargs):
         super().__init__(master=parent,
                         #  background='yellow',
+                         height= height,
                          *args, **kwargs)
         # using grid because LaterButton which is canvas isn't sharing equal space with pack 
-        self.rowconfigure(0,weight=1,uniform='a')
+        # self.rowconfigure((0,2),weight=1,uniform='a')
+        # self.rowconfigure((1),weight=2,uniform='a')
+        self.rowconfigure((0),weight=1,uniform = 'a')
         self.columnconfigure((0,1),weight=1,uniform='a')
-
+        
+        if height is not None:
+            self.grid_propagate(0) # forcing the frame to take assigned height
+        
         # Later buttons
-        self.update()
         later_button = LaterButton(master=self, text='Later',
-                                  callback_func=lambda event: self.update_database(exercise_dict,is_completed = False))
+                                  callback_func=lambda : self.update_database(exercise_dict,is_completed = False))
         # lambda event: because it is tag_binded to text
-        later_button.grid(row=0,column=0, sticky='news')
+        later_button.grid(row=0,column=0, sticky='nsew',padx=5)
 
 
         # done button
         done_button = ttk.Button(
             self,text='I Did It', command=lambda: self.update_database(exercise_dict,is_completed = True),style='did_it.TButton')
-        done_button.grid(row=0,column=1, sticky='news')
+        done_button.grid(row=0,column=1, sticky='nsew',)
+
 
 
 
@@ -269,16 +277,19 @@ class ActionButtonsFrame(tk.Frame):
         # exercise_log.add_reason()
         
         exercise_log.add_entry_to_database()
-        print(exercise_log.get_log_entry())
+        # print(exercise_log.get_log_entry())
 
 
         self.destroyed()
 
     def destroyed(self) -> None:
-        root = self.nametowidget('.')
-        # root.geometry('1000x1000')
-        root.destroy()
-
+        try:
+            root = self.nametowidget('.')
+            # root.geometry('1000x1000')
+            root.destroy()
+            # root.withdraw()
+        except Exception as e:
+            print(f"Error in my_job: {e}")
 
 if __name__ == '__main__':
     # root = ttkb.Window()

@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
-# from ttkbootstrap import Floodgauge
+# from ttkbootstrap import Floodgauge]
+from src.Gui.gui_settings import *
 from src.Gui.components import LaterButton
 def configure_styles():
     s = ttk.Style()
@@ -12,8 +13,7 @@ def configure_styles():
                 borderwidth = 0,
                 highlightthickness=0, 
                 relief='ridge',
-                text = 'sunday',
-                font = ('helvetica',12),
+                font = BUTTON_FONT,
                )
     s.map('did_it.TButton',background = [('active','#38CC33')])
 

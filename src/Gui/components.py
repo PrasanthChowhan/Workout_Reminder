@@ -70,9 +70,12 @@ class LaterButton(CanvasWithParentBackground):
 
     def _initialize_layout(self, event):
         self.delete('all')
+        root= self.winfo_toplevel()
+
+        root.update_idletasks()
         self.width = event.width
         self.height = event.height
-        # print(f'width = {self.width}, height = {self.height}')
+        print(f'width = {self.width}, height = {self.height}')
 
         self._background_width = 0
         self._animation_id = None  # for cancelling .after fucntion
@@ -84,8 +87,9 @@ class LaterButton(CanvasWithParentBackground):
                          fill=self.locked_text_color,
                          tags=('text_canvas'))
 
-        # bind event to tags
+        ## bind event to tags ##
         self.bind('<Enter>', self._activate_button_for_click)
+        # self.bind('<Enter>', self.callback_func) # no problem here
         self.bind('<Leave>', self._leaving_canvas_function, add='+')
 
     def _leaving_canvas_function(self, event):
@@ -102,7 +106,7 @@ class LaterButton(CanvasWithParentBackground):
             'text_canvas', fill=self.locked_text_color, activefill='')
 
     def _background_animation(self):
-        # progress like animation
+        ## progress like animation ##
         self.distance_to_cover = self.width  # Total width to cover in pixels
 
         self.animation_speed = int(
@@ -110,19 +114,24 @@ class LaterButton(CanvasWithParentBackground):
 
         # print(f'{time.ctime()} speed = {self.animation_speed}')
 
-        self.create_rectangle(0, 0, self._background_width, self.height,
-                              fill=self.progress_bar_color, width=0, tags=('background'))
+        
         # print('inside background animation',self._background_width)
-        if self._background_width < self.width:
+        if self._background_width <= self.width and self.winfo_exists():
+            self.create_rectangle(0, 0, self._background_width, self.height,
+                              fill=self.progress_bar_color, width=0, tags=('background'))
             # self._background_width += step_size
             self._background_width += 1
-            self._animation_id = self.after(
-                self.animation_speed, self._background_animation)
+            self._animation_id = self.after(self.animation_speed, self._background_animation)
 
         else:  # what to do after progress bar reaching end
             print('unlocked later button')
             self.itemconfigure(
                 'text_canvas', fill=self.unlocked_text_color, activefill=self.hover_text_color)
-            self.tag_bind('text_canvas', "<Button-1>",self.callback_func)
+            self.tag_bind('text_canvas', "<Button-1>",self.root_destroy)
+            # print('canvas exists:',self.winfo_exists())
 
         self.tag_lower('background')
+
+    def root_destroy(self,event):
+        self.after(100,self.callback_func)
+

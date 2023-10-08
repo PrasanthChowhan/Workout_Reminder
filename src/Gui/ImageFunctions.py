@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageTk, ImageEnhance, ImageChops
 import tkinter as tk
-from src.Gui.components import CanvasWithParentBackground
+# from src.Gui.components import CanvasWithParentBackground
+from tkinter import Canvas
 from dataclasses import dataclass
 import os
 import threading
@@ -154,7 +155,7 @@ class MyImage:
         return ImageTk.PhotoImage(Image)
 
 
-class CanvasWithShape(CanvasWithParentBackground):
+class CanvasWithShape(Canvas):
     def __init__(self, master, shape='rounded_rectangle', width=None, height=None, **kwargs):
         '''
         when height and width are not given instances cannot access the tags as .bind doesn't return anything
@@ -237,7 +238,7 @@ Prevents injuries and pain"""
                                      width=self.width, anchor=tk.CENTER, font=('roboto', 12), state=tk.DISABLED)
 
 
-class CircleImgIcon(CanvasWithParentBackground):
+class CircleImgIcon(Canvas):
     def __init__(self, master, width=None, height=None, fg_img_path='',
 
                  animate=True, *args, **kwargs):

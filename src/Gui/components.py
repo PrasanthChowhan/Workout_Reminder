@@ -1,7 +1,8 @@
 import tkinter as tk
+from tkinter import ttk
 import time
 from src.Gui.gui_settings import *
-
+from src.Gui.ImageFunctions import MyImage
 
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
@@ -36,17 +37,9 @@ class CanvasWithParentBackground(CustomWidget, tk.Canvas):
         super().__init__(master=master,
                          borderwidth=borderwidth, highlightthickness=highlightthickness, relief=relief, *args, **kwargs)
 
-# class LaterButton(tk.Button):
-#     def __init__(self, master=None,background : str =False, *args,**kwargs):
-
-#         if not background:
-#             background = master.cget('background')
-
-#         super().__init__(master=master, background=background, *args, **kwargs)
-
 
 class LaterButton(CanvasWithParentBackground):
-    def __init__(self, master=None,text :str = None, callback_func= None,wait_time :int = 1, *args, **kwargs):
+    def __init__(self, master=None, text: str = None, callback_func=None, wait_time: int = 1, *args, **kwargs):
         '''
         text: str 
         callback_func: callback function
@@ -70,7 +63,7 @@ class LaterButton(CanvasWithParentBackground):
 
     def _initialize_layout(self, event):
         self.delete('all')
-        root= self.winfo_toplevel()
+        root = self.winfo_toplevel()
 
         root.update_idletasks()
         self.width = event.width
@@ -98,7 +91,7 @@ class LaterButton(CanvasWithParentBackground):
         self.after_cancel(self._animation_id)
         self._background_width = 0
         self.itemconfigure('text_canvas', fill=self.locked_text_color)
-        self.tag_unbind('text_canvas', "<Button-1>", None )
+        self.tag_unbind('text_canvas', "<Button-1>", None)
 
     def _activate_button_for_click(self, event):
         self._background_animation()
@@ -114,24 +107,67 @@ class LaterButton(CanvasWithParentBackground):
 
         # print(f'{time.ctime()} speed = {self.animation_speed}')
 
-        
         # print('inside background animation',self._background_width)
         if self._background_width <= self.width and self.winfo_exists():
             self.create_rectangle(0, 0, self._background_width, self.height,
-                              fill=self.progress_bar_color, width=0, tags=('background'))
+                                  fill=self.progress_bar_color, width=0, tags=('background'))
             # self._background_width += step_size
             self._background_width += 1
-            self._animation_id = self.after(self.animation_speed, self._background_animation)
+            self._animation_id = self.after(
+                self.animation_speed, self._background_animation)
 
         else:  # what to do after progress bar reaching end
             print('unlocked later button')
             self.itemconfigure(
                 'text_canvas', fill=self.unlocked_text_color, activefill=self.hover_text_color)
-            self.tag_bind('text_canvas', "<Button-1>",self.root_destroy)
+            self.tag_bind('text_canvas', "<Button-1>", self.root_destroy)
             # print('canvas exists:',self.winfo_exists())
 
         self.tag_lower('background')
 
-    def root_destroy(self,event):
-        self.after(100,self.callback_func)
+    def root_destroy(self, event):
+        self.after(10, self.callback_func)
 
+
+class ExerciseIcon(ttk.Label):
+    def __init__(self, parent=None, img_path:str=None, text:str=None,set_background:str ='parent', *args, **kwargs):
+        print('path inside exercise icon:',img_path)
+
+        ## initialize ##
+        if set_background == 'parent':
+            color = parent.cget('background')
+        else: 
+            color = set_background
+        print('color:',color)
+
+        ## processing Image ##
+        my_image = MyImage(*ICON_SIZE) ## UNPACKING TUPLE
+        resized_image = my_image.resize_image(path=img_path,preserve_aspect=True,resize_percent_of_original=100)
+        self.tk_image = my_image.to_tk(resized_image)
+
+        # add to label
+        super().__init__(master=parent,text=text,
+                         image=self.tk_image,
+                         compound=tk.TOP,
+                         font=ICON_FONT,
+                         background=color,
+                         padding=(0,0),
+                         anchor= tk.CENTER,
+                        #  borderwidth=1,        ## FOR VISUALISATION ONLY ⬇
+                        #  relief = 'groove',
+                         ) 
+
+
+if __name__ == '__main__':
+    root = tk.Tk()
+    root.geometry('200x200')
+    root['bg'] = 'pink'
+
+    # ttk.Button(root,text='one',name= 'btn_i_did_it').pack(expand=True,fill='x',)
+    ExerciseIcon(root,r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\muscle.png',
+                 text='snorlax',
+                 set_background='red').pack(padx=10,pady=10)
+
+
+    root.mainloop()
+    

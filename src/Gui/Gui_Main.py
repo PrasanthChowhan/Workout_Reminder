@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.Gui.components import FrameWithParentBackground, LabelWithParentBackground,ButtonWithParentBackground,LaterButton
+from src.Gui.components import LaterButton,ExerciseIcon
 from src.DbManager import ExerciseLog
 from src.Gui.styles import configure_styles
 
@@ -26,6 +26,7 @@ class NotificationGui(tk.Tk):
         self.geometry("400x250")
         # self.attributes('-topmost', True)
         configure_styles()
+        self['bg'] ='cyan'
 
         
         
@@ -160,20 +161,21 @@ class BottomContainer(tk.Frame):
         text_frame = ttk.Label(self,
                               text=exercise_dict['name'],
                               anchor='w',
-                              #   background='magenta',
+                                # background='magenta',
                               font=self.h1,
 
                               ).pack(fill='x', pady=10)
 
         VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
-            fill='both', expand=True, pady=30)
+            fill='both', expand=True)
 
         # Description Frame
         # DescriptionFrame(parent=self).pack(expand=True, fill='both')
 
         # Action Frame
         ActionButtonsFrame(parent=self, exercise_dict=exercise_dict).pack(
-            side='bottom',fill='x',expand=True)
+            # side='bottom',
+            fill='x',pady=5)
 
     def setup(self):
         self.h1 = font.Font(
@@ -200,25 +202,31 @@ class IconStructure(tk.Frame):
 class VisualFrame(tk.Frame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
-                         background='red',
+                        #  background='red',
                          *args, **kwargs)
 
-        # values of recieved dict and icon name
+        ## values of recieved dict and icon name
         icons_list = ['difficulty', 'muscle', 'equipment']
+        columns = tuple(range(len(icons_list)))
 
-        for icon_name in icons_list:
+
+        ## USING GRID AND BECAUSE SOME IMAGES ARE NOT SHARING EQUAL SPACE
+        self.rowconfigure((0),weight=1,uniform='anytext')
+        self.columnconfigure(columns,weight=1,uniform='anytext')
+
+        for index, icon_name in enumerate(icons_list):
             path = f"resources\icons\{icon_name}.png"
-            IconStructure(master=self, text=exercise_dict[icon_name], path=path
-                          ).pack(side='left', expand=True, fill='both')
+            ExerciseIcon(parent=self, 
+                         img_path=path,
+                         text=exercise_dict[icon_name].capitalize() ## CAPITALIZE THE TEXT
+                         ).grid(row=0,column=index,sticky='news')
 
-        # icon = IconStructure(master=self, text=exercise_dict['difficulty'], path=path)
-        # icon.pack(side='left', expand=True, fill='both')
+            
+            
+            
+            # IconStructure(master=self, text=exercise_dict[icon_name], path=path
+            #               ).grid(row=0,column=index,sticky='news')
 
-        # icon2 = IconStructure(master=self, text=exercise_dict['muscle_targetted'], path=path)
-        # icon2.pack(side='left', expand=True, fill='both')
-
-        # icon3 = IconStructure(master=self, text=exercise_dict['equipment'], path=path)
-        # icon3.pack(side='left', expand=True, fill='both')
 
 
 class DescriptionFrame(tk.Frame):
@@ -260,9 +268,11 @@ class ActionButtonsFrame(tk.Frame):
 
 
         # done button
-        done_button = ttk.Button(
-            self,text='I Did It', command=lambda: self.update_database(exercise_dict,is_completed = True),style='did_it.TButton')
-        done_button.grid(row=0,column=1, sticky='nsew',)
+        done_button = ttk.Button(self,text='I Did It',
+                                command=lambda: self.update_database(exercise_dict,is_completed = True),
+                                style='did_it.TButton',
+                                )
+        done_button.grid(row=0,column=1, sticky='nsew',padx=5)
 
 
 

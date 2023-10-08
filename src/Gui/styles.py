@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
-# from ttkbootstrap import Floodgauge]
+
 from src.Gui.gui_settings import *
 from src.Gui.components import LaterButton
 def configure_styles():
@@ -14,6 +14,7 @@ def configure_styles():
                 highlightthickness=0, 
                 relief='ridge',
                 font = BUTTON_FONT,
+                anchor = tk.CENTER,
                )
     s.map('did_it.TButton',background = [('active','#38CC33')])
 
@@ -24,12 +25,12 @@ if __name__ == '__main__':
     root.geometry('200x100-0-0')
     configure_styles()
 
-    ttk.Button(root, style= 'did_it.TButton',text='one',name= 'btn_i_did_it').pack(expand=True,fill='x',)
+    ttk.Button(root, style= 'did_it.TButton',text='no padding',name= 'btn_i_did_it').pack()
 
-    later_button= LaterButton(root)
-    later_button.pack(
-        # expand=True,fill='x',
-                      padx=10,pady=10)
+    # later_button= LaterButton(root)
+    # later_button.pack(
+    #     # expand=True,fill='x',
+    #                   padx=10,pady=10)
     # root.update()
     # print('width',later_button.winfo_width())
     root.mainloop()

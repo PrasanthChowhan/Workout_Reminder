@@ -4,9 +4,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.Gui.components import LaterButton,ExerciseIcon
+from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle,CustomFrame
 from src.DbManager import ExerciseLog
 from src.Gui.styles import configure_styles
+from src.Gui.gui_settings import BACKGROUND_COLOR
 
 
 # import button_styling_and_functionality
@@ -14,22 +15,21 @@ from src.Gui.styles import configure_styles
 default_information = {'name': 'Default_Push-up',
                        'difficulty': 'beginner',
                        'muscle': 'chest',
-                       'equipment': 'bodyweight'}
+                       'equipment': 'bodyweight',
+                       'url': 'https://youtu.be/tD4HCZe-tew?si=YeGGkId2NMo0fHB0'
+                       }
 
 
 class NotificationGui(tk.Tk):
-    def __init__(self, exercise_dict:dict=default_information):
+    def __init__(self, exercise_dict: dict = default_information):
         super().__init__()
         self.title("HIDE THIS")
         # self.resizable(False, False)
         # self.overrideredirect(True)
         self.geometry("400x250")
-        # self.attributes('-topmost', True)
+        self.attributes('-topmost', True)
         configure_styles()
-        self['bg'] ='cyan'
-
-        
-        
+        # self['bg'] = 'cyan'
 
         SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
 
@@ -42,7 +42,6 @@ class NotificationGui(tk.Tk):
         BottomContainer(parent=self, padx=10, exercise_dict=exercise_dict).pack(
             expand=True, fill='both')
         # ).grid(row=1, column=0, sticky='news' )
-
 
 
 class SetWindowPosition:
@@ -147,24 +146,17 @@ class ImageFrame(tk.Frame):
 class BottomContainer(tk.Frame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
-
+                        background=BACKGROUND_COLOR,
                          *args, **kwargs)
 
-        # initialize
-        self.h1 = None
-        self.h2 = None
-        self.h3 = None
+        text_frame = ExerciseTitle(self,
+                                   text=exercise_dict['name'],
+                                   anchor='w',
+                                   url=exercise_dict['url'],
+                                   ).pack(fill='x', pady=(15, 2))
 
-        # fonts settings
-        self.setup()
-
-        text_frame = ttk.Label(self,
-                              text=exercise_dict['name'],
-                              anchor='w',
-                                # background='magenta',
-                              font=self.h1,
-
-                              ).pack(fill='x', pady=10)
+        # separator = ttk.Separator(self, orient='horizontal').pack(fill='x')
+        separator = tk.Frame(self,borderwidth=10, relief='groove',background='grey').pack(fill='x')
 
         VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
             fill='both', expand=True)
@@ -175,7 +167,7 @@ class BottomContainer(tk.Frame):
         # Action Frame
         ActionButtonsFrame(parent=self, exercise_dict=exercise_dict).pack(
             # side='bottom',
-            fill='x',pady=5)
+            fill='x', pady=5)
 
     def setup(self):
         self.h1 = font.Font(
@@ -199,36 +191,32 @@ class IconStructure(tk.Frame):
                   ).pack(pady=5)
 
 
-class VisualFrame(tk.Frame):
+class VisualFrame(CustomFrame): 
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
-                        #  background='red',
                          *args, **kwargs)
 
-        ## values of recieved dict and icon name
+        # values of recieved dict and icon name
         icons_list = ['difficulty', 'muscle', 'equipment']
         columns = tuple(range(len(icons_list)))
 
-
-        ## USING GRID AND BECAUSE SOME IMAGES ARE NOT SHARING EQUAL SPACE
-        self.rowconfigure((0),weight=1,uniform='anytext')
-        self.columnconfigure(columns,weight=1,uniform='anytext')
+        # USING GRID AND BECAUSE SOME IMAGES ARE NOT SHARING EQUAL SPACE
+        self.rowconfigure((0), weight=1, uniform='anytext')
+        self.columnconfigure(columns, weight=1, uniform='anytext')
 
         for index, icon_name in enumerate(icons_list):
             path = f"resources\icons\{icon_name}.png"
-            ExerciseIcon(parent=self, 
+            ExerciseIcon(parent=self,
                          img_path=path,
-                         text=exercise_dict[icon_name].capitalize() ## CAPITALIZE THE TEXT
-                         ).grid(row=0,column=index,sticky='news')
+                         # CAPITALIZE THE TEXT
+                         text=exercise_dict[icon_name].capitalize()
+                         ).grid(row=0, column=index, sticky='news')
 
-            
-            
-            
             # IconStructure(master=self, text=exercise_dict[icon_name], path=path
             #               ).grid(row=0,column=index,sticky='news')
 
 
-
+## MAY BE IN FUTURE UPDATES ##
 class DescriptionFrame(tk.Frame):
 
     def __init__(self, parent, *args, **kwargs):
@@ -245,50 +233,47 @@ class DescriptionFrame(tk.Frame):
         rectangular_background.pack(expand=True, fill='both')
 
 
-class ActionButtonsFrame(tk.Frame):
-    def __init__(self, parent, exercise_dict, height= 30, *args, **kwargs):
+class ActionButtonsFrame(CustomFrame):
+    def __init__(self, parent, exercise_dict, height=30,set_background = 'parent', *args, **kwargs):
+
         super().__init__(master=parent,
-                        #  background='yellow',
-                         height= height,
+                        set_background=set_background,
+                         height=height,
                          *args, **kwargs)
-        # using grid because LaterButton which is canvas isn't sharing equal space with pack 
+        # using grid because LaterButton which is canvas isn't sharing equal space with pack
         # self.rowconfigure((0,2),weight=1,uniform='a')
         # self.rowconfigure((1),weight=2,uniform='a')
-        self.rowconfigure((0),weight=1,uniform = 'a')
-        self.columnconfigure((0,1),weight=1,uniform='a')
-        
+        self.rowconfigure((0), weight=1, uniform='a')
+        self.columnconfigure((0, 1), weight=1, uniform='a')
+
         if height is not None:
-            self.grid_propagate(0) # forcing the frame to take assigned height
-        
+            self.grid_propagate(0)  # forcing the frame to take assigned height
+
         # Later buttons
         later_button = LaterButton(master=self, text='Later',
-                                  callback_func=lambda : self.update_database(exercise_dict,is_completed = False))
+                                   callback_func=lambda: self.update_database(exercise_dict, is_completed=False))
         # lambda event: because it is tag_binded to text
-        later_button.grid(row=0,column=0, sticky='nsew',padx=5)
-
+        later_button.grid(row=0, column=0, sticky='nsew', padx=5)
 
         # done button
-        done_button = ttk.Button(self,text='I Did It',
-                                command=lambda: self.update_database(exercise_dict,is_completed = True),
-                                style='did_it.TButton',
-                                )
-        done_button.grid(row=0,column=1, sticky='nsew',padx=5)
+        done_button = ttk.Button(self, text='I Did It',
+                                 command=lambda: self.update_database(exercise_dict, is_completed=True),
+                                 style='did_it.TButton',
+                                 cursor='hand2'
+                                 )
+        done_button.grid(row=0, column=1, sticky='nsew', padx=5)
 
+    def update_database(self, exercise_dict, is_completed):
 
-
-
-    def update_database(self, exercise_dict,is_completed):
-        
         exercise_log = ExerciseLog()
 
         exercise_log.copy_values_from_dict(exercise_dict)
 
         exercise_log.set_completed(is_completed)
         # exercise_log.add_reason()
-        
+
         exercise_log.add_entry_to_database()
         # print(exercise_log.get_log_entry())
-
 
         self.destroyed()
 
@@ -300,6 +285,7 @@ class ActionButtonsFrame(tk.Frame):
             # root.withdraw()
         except Exception as e:
             print(f"Error in my_job: {e}")
+
 
 if __name__ == '__main__':
     # root = ttkb.Window()

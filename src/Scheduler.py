@@ -13,7 +13,7 @@ def schedule_gui():
     print('exercise in scheduling gui: \t', exercise, '\n')
     root = NotificationGui(exercise_dict=exercise)
     root.mainloop()
-    print('rooot is exited')
+    # print('rooot is exited')
 
 
 if __name__ == '__main__':

@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 import time
+from typing import Any
 from src.Gui.gui_settings import *
 from src.Gui.styles import configure_styles
 from src.Gui.ImageFunctions import MyImage
@@ -204,17 +205,50 @@ class ExerciseTitle(ttk.Label):
         webbrowser.open(self.url)
 
 
+class DisableInteractionWithOtherWindow(tk.Toplevel):
+    def __init__(self,parent,):
+        super().__init__(master=parent,
+                         background='black',
+                         cursor= 'pirate'
+                         )
+
+        ## INITIALIZE ##
+        self.parent = parent
+
+        ## Get the screen width and height ##
+        screen_width = parent.winfo_screenwidth()
+        screen_height = parent.winfo_screenheight()
+
+        ## Customising TOP LEVEL WINDOW ##
+        self.geometry(f"{screen_width}x{screen_height}")
+        self.overrideredirect(True)
+        self.attributes("-alpha", 0.5)
+        self.attributes("-topmost", True)
+        
+        self.bind('<Any-Button>',self.below_parent)
+
+        ## FOR DEVELOPMENT ONLY ##
+        self.bind('<Escape>',self.escape) 
+
+    def below_parent(self,event):
+        self.lower(belowThis=self.parent)
+
+    def escape(self,event):
+        root =self.winfo_toplevel()
+        root.destroy()
+        
 
 if __name__ == '__main__':
     root = tk.Tk()
     root.geometry('200x200')
     root['bg'] = 'pink'
     configure_styles()
-    
+    root.attributes("-topmost", True)
 
     # ttk.Button(root,text='one',name= 'btn_i_did_it').pack(expand=True,fill='x',)
     ExerciseIcon(root, r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\muscle.png',
                  text='snorlax',
                  set_background='red').pack(padx=10, pady=10)
     label = ExerciseTitle(root,text= 'working underline',).pack()
+    DisableInteractionWithOtherWindow(parent=root)
     root.mainloop()

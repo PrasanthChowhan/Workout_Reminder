@@ -21,7 +21,7 @@ from tkinter import font
 
 ############
 BACKGROUND_COLOR    = '#2c2c2c'
-SEPARATOR_COLOR     = ''
+SEPARATOR_COLOR     = 'red'
 ## Title font ##
 TITLE_FONT      = ('Montserrat',15,'bold')
 TITLE_FONT_HOVER = ('Montserrat',15,'bold','roman','underline')

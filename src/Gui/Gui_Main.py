@@ -4,10 +4,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle,CustomFrame
+from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle,CustomFrame,DisableInteractionWithOtherWindow
 from src.DbManager import ExerciseLog
 from src.Gui.styles import configure_styles
-from src.Gui.gui_settings import BACKGROUND_COLOR
+from src.Gui.gui_settings import BACKGROUND_COLOR,SEPARATOR_COLOR
 
 
 # import button_styling_and_functionality
@@ -31,7 +31,10 @@ class NotificationGui(tk.Tk):
         configure_styles()
         # self['bg'] = 'cyan'
 
-        SetWindowPosition.for_tk(window=self, position=(0, 0, 'e'))
+        ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##
+        DisableInteractionWithOtherWindow(self)
+
+        SetWindowPosition.for_tk(window=self, position=(0,0,'c'))
 
         # # notificaiton configuration
         # self.rowconfigure(0, weight=1, uniform='a')
@@ -77,6 +80,10 @@ class SetWindowPosition:
             ypos = screen_h - top_h
         else:
             ypos = position[1]
+        
+        if 'c' in anchor: # center of the screen
+            xpos = screen_w - top_w
+            ypos = screen_h - top_h
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
         # window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
@@ -156,7 +163,7 @@ class BottomContainer(tk.Frame):
                                    ).pack(fill='x', pady=(15, 2))
 
         # separator = ttk.Separator(self, orient='horizontal').pack(fill='x')
-        separator = tk.Frame(self,borderwidth=10, relief='groove',background='grey').pack(fill='x')
+        separator = tk.Frame(self,borderwidth=10, relief='groove',background=SEPARATOR_COLOR).pack(fill='x')
 
         VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
             fill='both', expand=True)
@@ -248,7 +255,6 @@ class ActionButtonsFrame(CustomFrame):
 
         if height is not None:
             self.grid_propagate(0)  # forcing the frame to take assigned height
-
         # Later buttons
         later_button = LaterButton(master=self, text='Later',
                                    callback_func=lambda: self.update_database(exercise_dict, is_completed=False))

@@ -1,4 +1,14 @@
-difficulty : beginner # beginner, intermediate, advanced 
-equipment : yoga # bodyweight,band,stretches,yoga
-muscle : default
-
+Integration setting:
+  Notion:
+    api: do not notion api
+    page_id: page_id
+    save: False
+  Potion:
+    api: secret_apit
+    page_id: page_id
+    save: true
+database:
+  difficulty: ''
+  equipment: ''
+  muscle: ''
+schedule: '45'

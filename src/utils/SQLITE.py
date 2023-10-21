@@ -1,6 +1,51 @@
 import sqlite3
 class SqliteDefs:
     @staticmethod
+    def get_distinct_column_values(table_name:str, column_name:str, database_or_cursor=None,conditions:list = None)->list:
+        """
+        Get distinct values from a specified column in a table.
+
+        Args:
+            table_name (str): The name of the table.
+            column_name (str): The name of the column.
+            database_or_cursor (str or sqlite3.Cursor, optional): The SQLite database file path
+                or an open cursor object. If not provided, a new connection will be created.
+            conditions (list): A list of strings specifying conditions to filter the data (e.g., ["column1 = 'value'", "column2 > 42"])..
+
+        Returns:
+            list: A list of distinct values from the specified column.
+
+        Example:
+            distinct_values = get_distinct_column_values("my_table", "my_column", "my_database.db")
+            print("Distinct values:", distinct_values)
+        """
+        try:
+            if isinstance(database_or_cursor, sqlite3.Cursor):
+                cursor = database_or_cursor
+            else:
+                conn = sqlite3.connect(database_or_cursor)
+                cursor = conn.cursor()
+            
+            # Execute an SQL query to retrieve distinct values from the specified column
+             # Build the SQL query with the condition
+            if conditions:
+                query = f"SELECT DISTINCT {column_name} FROM {table_name} WHERE {' AND '.join(conditions)};"
+            else:
+                query = f"SELECT DISTINCT {column_name} FROM {table_name};"
+            cursor.execute(query)
+            
+            # Fetch all the distinct values as a list
+            distinct_values = [row[0] for row in cursor.fetchall()]
+            
+            return distinct_values
+        
+        except sqlite3.Error as e:
+            print(f"SQLite error: {e}")
+            return []
+        finally:
+            if not isinstance(database_or_cursor, sqlite3.Cursor) and conn:
+                conn.close()
+    @staticmethod
     def create_new_table_from_a_column_of_existing_table(cursor, source_table, source_column, dest_table, dest_column):
         """
         Create a new table for distinct values and populate it with unique values from a source table.
@@ -394,7 +439,72 @@ class SqliteDefs:
             if isinstance(database_or_cursor, str):
                 # Close the database connection if it was created here
                 connection.close()
+    @staticmethod
+    def insert_data_into_table(database_or_cursor, table_name: str, data_dict: dict) -> bool:
+        """
+        Insert data into a table in an SQLite database.
 
+        Args:
+            database_or_cursor (str or sqlite3.Cursor): Either a database path or a cursor object.
+            table_name (str): The name of the table where data will be inserted.
+            data_dict (dict): A dictionary where keys are column names, and values are the data to be inserted.
+
+        Returns:
+            bool: True if the insertion was successful, False if an error occurred.
+
+        Raises:
+            ValueError: If the database_or_cursor argument is invalid.
+
+        Example:
+            data = {
+                "name": "John Doe",
+                "age": 30,
+                "city": "New York"
+            }
+            success = insert_data_into_table("mydb.db", "users", data)
+            if success:
+                print("Data inserted successfully.")
+            else:
+                print("Error inserting data.")
+        """
+        if isinstance(database_or_cursor, str):
+            # If a database path is provided, create a new connection and cursor
+            connection = sqlite3.connect(database_or_cursor)
+            cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Create the table if it doesn't exist
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS {table_name} (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    {", ".join(data_dict.keys())}
+                )
+            ''')
+
+            # Insert data into the table
+            placeholders = ", ".join(["?" for _ in data_dict])
+            values = tuple(data_dict.values())
+
+            cursor.execute(f'''
+                INSERT INTO {table_name} ({", ".join(data_dict.keys())})
+                VALUES ({placeholders})
+            ''', values)
+
+            connection.commit()
+            return True  # Success
+
+        except sqlite3.Error as e:
+            print(f"Error inserting data: {e}")
+            return False  # Error occurred
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
 
 if __name__ == '__main__':
 

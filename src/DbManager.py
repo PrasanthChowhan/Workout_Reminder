@@ -1,6 +1,6 @@
 import sqlite3,os,pprint
 import yaml
-from dataclasses import dataclass
+
 from datetime import datetime
 import random as rnd
 # this is custom package will be present in learning respository
@@ -10,6 +10,7 @@ from src.utils.constants import *
 
 '''
 What this module does 
+    * Everything related to data
  * read settings.yaml file
  * use that as query to search table
  * return one exercise 
@@ -18,18 +19,37 @@ What this module does
 
 
 class ConfigReader:
-    def __init__(self, config_file_path):
+    def __init__(self, config_file_path=None):
         self.config_file_path = config_file_path
 
     def read_config_file(self) -> dict:
         """
         Read and parse the configuration file in YAML format.
+
         Returns:
             dict: A dictionary containing the parsed configuration data.
+
+        Raises:
+            FileNotFoundError: If the configuration file is not found.
+            yaml.YAMLError: If there is an error parsing the YAML file.
+            ValueError: If the configuration data is invalid or empty.
+
+        Returns an empty dictionary if errors occur during the process.
         """
-        with open(self.config_file_path) as config_file:
-            loaded_data = yaml.safe_load(config_file)
-        return loaded_data
+        try:
+            with open(self.config_file_path, 'r') as config_file:
+                loaded_data = yaml.safe_load(config_file)
+                if loaded_data is not None and isinstance(loaded_data, dict):
+                    return loaded_data
+                else:
+                    raise ValueError("Invalid or empty configuration data in the YAML file.")
+        except FileNotFoundError:
+            print(f"Config file not found: {self.config_file_path}")
+        except yaml.YAMLError as e:
+            print(f"Error parsing YAML file: {e}")
+        except Exception as e:
+            print(f"An error occurred: {e}")
+        return {}  # Return an empty dictionary in case of errors
 
     def write_config_file(self, data: dict):
         """
@@ -37,29 +57,88 @@ class ConfigReader:
         Args:
             data (dict): The data to be written to the file.
         """
-        with open(self.config_file_path, 'w') as config_file:
+        with open(self.config_file_path, 'a') as config_file:
             yaml.dump(data, config_file,
-                      default_flow_style=False, sort_keys=False)
+                      default_flow_style=False, sort_keys=True,indent=4)
+            print('done writing configuration')
+
+    def update_or_create_yaml_file(self,file_path, data_to_update):
+        """
+        Update a YAML file with key-value pairs or create the file if it doesn't exist.
+
+        Args:
+            file_path (str): The path to the YAML file.
+            data_to_update (dict or str): A dictionary of key-value pairs to update or a single key (str).
+                If a single key is provided, it will be updated with an empty string.
+
+        Returns:
+            bool: True if the update was successful, False if there was an error.
+        """
+        try:
+            # Check if the file exists, and if not, create it
+            if not os.path.exists(file_path):
+                with open(file_path, 'w') as new_file:
+                    new_file.write('')  # Create an empty file
+
+            # Read the existing YAML data
+            with open(file_path, 'r') as file:
+                existing_data = yaml.safe_load(file) or {}
+
+            if isinstance(data_to_update, dict):
+                # If data_to_update is a dictionary, update the existing data with its contents
+                existing_data.update(data_to_update)
+            elif isinstance(data_to_update, str):
+                # If data_to_update is a string, treat it as a single key and update it with an empty string
+                existing_data[data_to_update] = ''
+
+            # Write the updated data back to the file
+            with open(file_path, 'w') as file:
+                yaml.dump(existing_data, file, default_flow_style=False)
+
+            return True  # Successful update
+
+        except Exception as e:
+            print(f"Error updating or creating YAML file: {e}")
+            return False  # Error occurred during update or creation
+
+    
 
 
-class DataSelector:
-    def __init__(self, database_path, table, query_conditions):
-        # initialize
-        self.database_path = database_path
-        self.query_conditions = query_conditions
-        self.table = table
+    # def update_or_create_yaml_file(file_path, key, new_value):
+    #     """
+    #     Update a value in a YAML file or create the file if it doesn't exist.
 
-    def select_matching(self, only_one=False, random=False) -> dict:
-        exercises_matching_condition = SqliteDefs.retrieve_data_as_dict(self.database_path,
-                                                                        self.table,
-                                                                        self.query_conditions)
-        if only_one and exercises_matching_condition and not random:
-            return exercises_matching_condition[0]  # return first element
-        elif only_one and random and exercises_matching_condition:  # return random
-            # [0] because retrieve_data_as_dict gives list of dicts
-            return rnd.choices(exercises_matching_condition)[0]
-        else:
-            return exercises_matching_condition  # returns all matching
+    #     Args:
+    #         file_path (str): The path to the YAML file.
+    #         key (str): The key to update in the YAML data.
+    #         new_value: The new value to set for the specified key.
+
+    #     Returns:
+    #         bool: True if the update was successful, False if there was an error.
+    #     """
+    #     try:
+    #         # Check if the file exists, and if not, create it
+    #         if not os.path.exists(file_path):
+    #             with open(file_path, 'w') as new_file:
+    #                 new_file.write('')  # Create an empty file
+
+    #         # Read the existing YAML data
+    #         with open(file_path, 'r') as file:
+    #             data = yaml.safe_load(file) or {}
+
+    #         # Update the data
+    #         data[key] = new_value
+
+    #         # Write the updated data back to the file
+    #         with open(file_path, 'w') as file:
+    #             yaml.dump(data, file, default_flow_style=False)
+
+    #         return True  # Successful update
+
+    #     except Exception as e:
+    #         print(f"Error updating or creating YAML file: {e}")
+    #         return False  # Error occurred during update or creation
+ 
 
 
 
@@ -68,7 +147,7 @@ class ExerciseLog:
     used for Gui 
     - create a new db if it doesn't exist
     - create the table in the following format
-    - methods manipulate the dictionary of this class
+    - methods to manipulate the dictionary of this class
     
     '''
     def __init__(self):
@@ -87,7 +166,8 @@ class ExerciseLog:
         }
 
     def set_completed(self, is_completed):
-        self.log_entry['completed'] = is_completed
+        print(is_completed)
+        self.log_entry['completed'] = bool(is_completed)
 
     def add_reason(self, text):
         self.log_entry['reason'] = text
@@ -98,7 +178,7 @@ class ExerciseLog:
                 self.log_entry[key] = source_dict[key]
 
     def add_entry_to_database(self):
-        DbManager.insert_data_into_table(EXERCISE_LOG_PATH, 'Track', self.log_entry)
+        SqliteDefs.insert_data_into_table(EXERCISE_LOG_PATH, 'Track', self.log_entry)
 
     def get_log_entry(self):
         return self.log_entry
@@ -121,7 +201,7 @@ class DbManager:
         user_preference_dict = ConfigReader(self.config_file_path).read_config_file()
 
         if user_preference_dict['muscle'] == 'default': 
-            # if default cycle through exercises
+            # if default, cycle through exercises
 
             if not os.path.exists(self.exercise_log_path): 
                 # if log db doesn't exist, program launched for the first time
@@ -139,7 +219,7 @@ class DbManager:
 
     def process_settings(self, setting_dict) -> list:
         '''
-        returns list of conditions which will be used further to create queiry conditions
+        returns list of conditions which will be used further to create query conditions
         '''
         condition_list = []
 
@@ -149,76 +229,8 @@ class DbManager:
         for key, value in setting_dict.items():
 
             condition_list.append(f"{key}='{value}'")
-
+        print(condition_list)
         return condition_list
-
-    @staticmethod
-    def insert_data_into_table(database_or_cursor, table_name: str, data_dict: dict) -> bool:
-        """
-        Insert data into a table in an SQLite database.
-
-        Args:
-            database_or_cursor (str or sqlite3.Cursor): Either a database path or a cursor object.
-            table_name (str): The name of the table where data will be inserted.
-            data_dict (dict): A dictionary where keys are column names, and values are the data to be inserted.
-
-        Returns:
-            bool: True if the insertion was successful, False if an error occurred.
-
-        Raises:
-            ValueError: If the database_or_cursor argument is invalid.
-
-        Example:
-            data = {
-                "name": "John Doe",
-                "age": 30,
-                "city": "New York"
-            }
-            success = insert_data_into_table("mydb.db", "users", data)
-            if success:
-                print("Data inserted successfully.")
-            else:
-                print("Error inserting data.")
-        """
-        if isinstance(database_or_cursor, str):
-            # If a database path is provided, create a new connection and cursor
-            connection = sqlite3.connect(database_or_cursor)
-            cursor = connection.cursor()
-        elif isinstance(database_or_cursor, sqlite3.Cursor):
-            # If a cursor is provided, use it directly
-            cursor = database_or_cursor
-        else:
-            raise ValueError("Invalid database_or_cursor argument")
-
-        try:
-            # Create the table if it doesn't exist
-            cursor.execute(f'''
-                CREATE TABLE IF NOT EXISTS {table_name} (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    {", ".join(data_dict.keys())}
-                )
-            ''')
-
-            # Insert data into the table
-            placeholders = ", ".join(["?" for _ in data_dict])
-            values = tuple(data_dict.values())
-
-            cursor.execute(f'''
-                INSERT INTO {table_name} ({", ".join(data_dict.keys())})
-                VALUES ({placeholders})
-            ''', values)
-
-            connection.commit()
-            return True  # Success
-
-        except sqlite3.Error as e:
-            print(f"Error inserting data: {e}")
-            return False  # Error occurred
-        finally:
-            if isinstance(database_or_cursor, str):
-                # Close the database connection if it was created here
-                connection.close()
-
 class ExerciseDatabase:
     def __init__(self):
         self.exercise_db_path = EXERCISE_DB_PATH
@@ -247,7 +259,16 @@ class ExerciseDatabase:
     def select_matching(self,query_conditions, only_one=False, random=False) -> dict:
         exercises_matching_condition = SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,
                                                                         'Exercise',
-                                                                        query_conditions)
+                                                                       query_conditions)
+            ## IF NO EXERCISE FOUND WITH GIVEN DIFFICULTY REMOVE DIFFICULTY AND SERCHISE
+        if not exercises_matching_condition:
+            query_with_removed_difficiculty = [item for item in query_conditions if not item.startswith("difficulty=")]
+            exercises_matching_condition = SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,
+                                                                        'Exercise',
+                                                                       query_with_removed_difficiculty)
+
+
+        print('Query conditions:', query_conditions)
         if only_one and exercises_matching_condition and not random:
             return exercises_matching_condition[0]  # return first element
         elif only_one and random and exercises_matching_condition:  # return random

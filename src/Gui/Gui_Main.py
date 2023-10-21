@@ -4,10 +4,10 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle,CustomFrame,DisableInteractionWithOtherWindow
+from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle, CustomFrame, DisableInteractionWithOtherWindow,ReasonTextGui
 from src.DbManager import ExerciseLog
 from src.Gui.styles import configure_styles
-from src.Gui.gui_settings import BACKGROUND_COLOR,SEPARATOR_COLOR
+from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR
 
 
 # import button_styling_and_functionality
@@ -34,7 +34,7 @@ class NotificationGui(tk.Tk):
         ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##
         DisableInteractionWithOtherWindow(self)
 
-        SetWindowPosition.for_tk(window=self, position=(0,0,'c'))
+        SetWindowPosition.for_tk(window=self, position=(0, 0, 'c'))
 
         # # notificaiton configuration
         # self.rowconfigure(0, weight=1, uniform='a')
@@ -80,8 +80,8 @@ class SetWindowPosition:
             ypos = screen_h - top_h
         else:
             ypos = position[1]
-        
-        if 'c' in anchor: # center of the screen
+
+        if 'c' in anchor:  # center of the screen
             xpos = screen_w - top_w
             ypos = screen_h - top_h
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
@@ -153,7 +153,7 @@ class ImageFrame(tk.Frame):
 class BottomContainer(tk.Frame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
-                        background=BACKGROUND_COLOR,
+                         background=BACKGROUND_COLOR,
                          *args, **kwargs)
 
         text_frame = ExerciseTitle(self,
@@ -163,7 +163,8 @@ class BottomContainer(tk.Frame):
                                    ).pack(fill='x', pady=(15, 2))
 
         # separator = ttk.Separator(self, orient='horizontal').pack(fill='x')
-        separator = tk.Frame(self,borderwidth=10, relief='groove',background=SEPARATOR_COLOR).pack(fill='x')
+        separator = tk.Frame(self, borderwidth=10, relief='groove',
+                             background=SEPARATOR_COLOR).pack(fill='x')
 
         VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
             fill='both', expand=True)
@@ -198,7 +199,7 @@ class IconStructure(tk.Frame):
                   ).pack(pady=5)
 
 
-class VisualFrame(CustomFrame): 
+class VisualFrame(CustomFrame):
     def __init__(self, parent, exercise_dict, *args, **kwargs):
         super().__init__(master=parent,
                          *args, **kwargs)
@@ -241,10 +242,10 @@ class DescriptionFrame(tk.Frame):
 
 
 class ActionButtonsFrame(CustomFrame):
-    def __init__(self, parent, exercise_dict, height=30,set_background = 'parent', *args, **kwargs):
+    def __init__(self, parent, exercise_dict, height=30, set_background='parent', *args, **kwargs):
 
         super().__init__(master=parent,
-                        set_background=set_background,
+                         set_background=set_background,
                          height=height,
                          *args, **kwargs)
         # using grid because LaterButton which is canvas isn't sharing equal space with pack
@@ -257,31 +258,45 @@ class ActionButtonsFrame(CustomFrame):
             self.grid_propagate(0)  # forcing the frame to take assigned height
         # Later buttons
         later_button = LaterButton(master=self, text='Later',
-                                   callback_func=lambda: self.update_database(exercise_dict, is_completed=False))
+                                   callback_func=lambda: self.create_entry(exercise_dict, is_completed=False))
         # lambda event: because it is tag_binded to text
-        later_button.grid(row=0, column=0, sticky='nsew', padx=5)
+        later_button.grid(row=0, column=0, sticky='nsew', padx=5,)
 
         # done button
         done_button = ttk.Button(self, text='I Did It',
-                                 command=lambda: self.update_database(exercise_dict, is_completed=True),
+                                 command=lambda: self.create_entry(
+                                     exercise_dict, is_completed=True),
                                  style='did_it.TButton',
-                                 cursor='hand2'
+                                 cursor='hand2',
                                  )
         done_button.grid(row=0, column=1, sticky='nsew', padx=5)
 
-    def update_database(self, exercise_dict, is_completed):
-
+    def create_entry(self, exercise_dict, is_completed):
         exercise_log = ExerciseLog()
 
         exercise_log.copy_values_from_dict(exercise_dict)
 
         exercise_log.set_completed(is_completed)
         # exercise_log.add_reason()
+        
+        if is_completed is False: ## Get REason for not doing ##            
+            root = self.winfo_toplevel()
+            reason_gui = ReasonTextGui(parent=root,exercise_log=exercise_log)
 
-        exercise_log.add_entry_to_database()
+        elif is_completed is True:
+            exercise_log.add_entry_to_database()
+            self.destroyed()
+
+
+        
+
+
         # print(exercise_log.get_log_entry())
 
-        self.destroyed()
+       
+    def add_entry_to_database(self,exercise_log):
+        exercise_log.add_entry_to_database()
+        # self.destroyed()
 
     def destroyed(self) -> None:
         try:

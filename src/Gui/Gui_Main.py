@@ -1,11 +1,12 @@
 
 from tkinter import Canvas
+import threading
 import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
 from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle, CustomFrame, DisableInteractionWithOtherWindow,ReasonTextGui
-from src.DbManager import ExerciseLog
+from src.Exerciselog import ExerciseLog
 from src.Gui.styles import configure_styles
 from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR
 
@@ -16,7 +17,7 @@ default_information = {'name': 'Default_Push-up',
                        'difficulty': 'beginner',
                        'muscle': 'chest',
                        'equipment': 'bodyweight',
-                       'url': 'https://youtu.be/tD4HCZe-tew?si=YeGGkId2NMo0fHB0'
+                       'url': 'https://www.youtube.com/@prasanthchowhan'
                        }
 
 
@@ -288,15 +289,7 @@ class ActionButtonsFrame(CustomFrame):
             self.destroyed()
 
 
-        
-
-
-        # print(exercise_log.get_log_entry())
-
-       
-    def add_entry_to_database(self,exercise_log):
-        exercise_log.add_entry_to_database()
-        # self.destroyed()
+    
 
     def destroyed(self) -> None:
         try:

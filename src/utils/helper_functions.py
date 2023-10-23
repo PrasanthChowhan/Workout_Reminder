@@ -1,6 +1,26 @@
 import json
 
+def get_nested_dict_value(d, key_to_find):
+    """
+    Recursively search for a key in a nested dictionary and return its value.
 
+    Args:
+        d (dict): The nested dictionary to search.
+        key_to_find (str): The key to search for.
+
+    Returns:
+        Any: The value associated with the specified key, or None if the key is not found.
+    """
+
+    for key, value in d.items():
+        if key == key_to_find:
+            return value
+        elif isinstance(value, dict):
+            result = get_nested_dict_value(value, key_to_find)
+            if result is not None:
+                return result
+
+    return None  # Key not found in the nested dictionary
 def open_json_file(path):
     """
     Load existing JSON data from 'data.json' file.

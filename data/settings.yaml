@@ -1,14 +1,15 @@
 Integration setting:
   Notion:
     api: do not notion api
-    page_id: page_id
-    save: False
-  Potion:
-    api: secret_apit
+    database_id: 710bea89-d69e-4664-9c20-ac0c4d48358f
     page_id: page_id
     save: true
+  Potion:
+    api: ''
+    page_id: ''
+    save: false
 database:
-  difficulty: ''
-  equipment: ''
-  muscle: ''
+  difficulty: advanced
+  equipment: bodyweight
+  muscle: default
 schedule: '45'

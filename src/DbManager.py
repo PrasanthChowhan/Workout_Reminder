@@ -1,16 +1,17 @@
 import sqlite3,os,pprint
 import yaml
 
-from datetime import datetime
+
 import random as rnd
 # this is custom package will be present in learning respository
 # from python_learned.Sqlite import SqliteDefs
 from src.utils.SQLITE import SqliteDefs
+
 from src.utils.constants import *
 
 '''
 What this module does 
-    * Everything related to data
+ * Everything related to data
  * read settings.yaml file
  * use that as query to search table
  * return one exercise 
@@ -142,47 +143,6 @@ class ConfigReader:
 
 
 
-class ExerciseLog:
-    '''
-    used for Gui 
-    - create a new db if it doesn't exist
-    - create the table in the following format
-    - methods to manipulate the dictionary of this class
-    
-    '''
-    def __init__(self):
-        current_datetime = datetime.now()
-        self.log_entry = {
-            'name': None,
-            'muscle': None,
-            'difficulty': None,
-            'equipment': None,
-            'completed': None,
-            'reason': None,
-            'date': current_datetime.strftime('%d'),
-            'month': current_datetime.strftime('%B'),
-            'year': current_datetime.strftime('%Y'),
-            'time': current_datetime.strftime('%H:%M:%S')
-        }
-
-    def set_completed(self, is_completed):
-        print(is_completed)
-        self.log_entry['completed'] = bool(is_completed)
-
-    def add_reason(self, text):
-        self.log_entry['reason'] = text
-
-    def copy_values_from_dict(self, source_dict):
-        for key in source_dict:
-            if key in self.log_entry:
-                self.log_entry[key] = source_dict[key]
-
-    def add_entry_to_database(self):
-        SqliteDefs.insert_data_into_table(EXERCISE_LOG_PATH, 'Track', self.log_entry)
-
-    def get_log_entry(self):
-        return self.log_entry
-
 
 class DbManager:
     def __init__(self):
@@ -199,6 +159,7 @@ class DbManager:
 
         # get user preference from settings.yaml
         user_preference_dict = ConfigReader(self.config_file_path).read_config_file()
+        user_preference_dict = user_preference_dict['database']
 
         if user_preference_dict['muscle'] == 'default': 
             # if default, cycle through exercises

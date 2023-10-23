@@ -160,7 +160,8 @@ class ReasonTextGui(tk.Toplevel):
         super().__init__(master=parent)
         # self.geometry("400x250")
         self.attributes('-topmost', True)
-        self.transient(master=parent)
+        self.transient(parent) # Make the top-level window transient to the main window
+        self.grab_set() # Prevent interaction with the main window while the top-level window is open
 
         ## INITIALIZE ##
         self.text = ""

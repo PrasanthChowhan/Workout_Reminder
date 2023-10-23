@@ -55,7 +55,7 @@ class ConfigureStyle:
         
 def configure_styles():
     s = ttk.Style()
-    # s.theme_use('default')
+    s.theme_use('default')
     ## Did it Button ##
     s.configure('did_it.TButton',
                 foreground=DID_IT_BUTTON_FOREGROUND,

@@ -2,7 +2,10 @@ from datetime import datetime
 from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import *
 from src.NotionIntegrate import NotionIntergrate
-import time,threading
+import time
+import threading
+
+
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -26,18 +29,17 @@ class ExerciseLog:
     def __init__(self):
         current_datetime = datetime.now()
         self.log_entry = {
-            'name'      : None,
-            'muscle'    : None,
+            'name': None,
+            'muscle': None,
             'difficulty': None,
-            'equipment' : None,
-            'completed' : False,
-            'reason'    : '',
-            'url'       : '',
-            'date_time' : current_datetime.isoformat()
+            'equipment': None,
+            'completed': False,
+            'reason': '',
+            'url': '',
+            'date_time': current_datetime.isoformat()
         }
 
     def set_completed(self, is_completed):
-        print(is_completed)
         self.log_entry['completed'] = bool(is_completed)
 
     def add_reason(self, text):
@@ -47,11 +49,14 @@ class ExerciseLog:
         for key in source_dict:
             if key in self.log_entry:
                 self.log_entry[key] = source_dict[key]
-    @timing_decorator
-    def add_entry_to_database(self):  
-        
-        threading.Thread(target=lambda:SqliteDefs.insert_data_into_table(EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
-        threading.Thread(target=lambda:NotionIntergrate().add_row_to_database(self.log_entry)).start()
+    # @timing_decorator
+
+    def add_entry_to_database(self):
+
+        threading.Thread(target=lambda: SqliteDefs.insert_data_into_table(
+            DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
+        threading.Thread(target=lambda: NotionIntergrate(
+        ).add_row_to_database(self.log_entry)).start()
 
     def get_log_entry(self):
         return self.log_entry

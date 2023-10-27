@@ -1,24 +1,3 @@
-import tkinter as tk
-from tkinter import font
-
-# BACKGROUND_COLOR    = '#2c2c2c'
-# SEPARATOR_COLOR     = ''
-# ## Title font ##
-# TITLE_FONT      = ('Montserrat',15,'bold')
-# TITLE_FONT_HOVER = ('Montserrat',15,'bold','roman','underline')
-# TITLE_FOREGROUND_COLOR = 'WHITE'
-
-
-# ICON_FONT = ('Montserrat Alternates SemiBold', 11,'bold')
-# ICON_SIZE = (40,40)
-
-# BUTTON_FONT = ('Montserrat Alternates SemiBold', 12)
-# DID_IT_BUTTON_FOREGROUND        = '#282A3A'
-# DID_IT_BUTTON_BACKGROUND        = '#009688'
-# DID_IT_BUTTON_BACKGROUND_ACTIVE = '#009688'
-
-
-
 ############
 BACKGROUND_COLOR    = '#2c2c2c'
 SEPARATOR_COLOR     = 'red'

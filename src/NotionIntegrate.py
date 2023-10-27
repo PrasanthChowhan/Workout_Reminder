@@ -1,7 +1,6 @@
 import requests
 import json
 from src.utils.SQLITE import SqliteDefs
-from src.utils.helper_functions import get_nested_dict_value
 from src.utils.constants import DatabaseConstants
 from src.DbManager import ConfigReader
 
@@ -30,9 +29,8 @@ class NotionIntergrate:
             if self.notion_settings.get('save', False):
 
                 # CHECK IF DBID EXISTS IF NOT CREATE DATABASE
-                self.database_id = self.notion_settings.get(
-                    'database_id', None)
-                if self.database_id == None:
+                self.database_id = self.notion_settings.get('database_id', None)
+                if self.database_id == None or self.database_id == '':
                     self.database_id = self.create_db()
                     settings['Integration setting']['Notion']['database_id'] = self.database_id
                     ## Add to file ##

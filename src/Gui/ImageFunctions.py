@@ -1,6 +1,6 @@
 from PIL import Image, ImageDraw, ImageTk, ImageEnhance, ImageChops
 import tkinter as tk
-# from src.Gui.components import CanvasWithParentBackground
+
 from tkinter import Canvas
 from dataclasses import dataclass
 import os
@@ -294,8 +294,7 @@ class CircleImgIcon(Canvas):
         # Event handlers
         if self.animate:
             self.bind('<Enter>', lambda event: self.threader(self.change_color))
-            self.bind('<Leave>', lambda event: self.threader(
-                self.revert_to_original_state))
+            self.bind('<Leave>', lambda event: self.threader(self.revert_to_original_state))
 
         self.animate_number = 1  # Counter (may need improvement)
 

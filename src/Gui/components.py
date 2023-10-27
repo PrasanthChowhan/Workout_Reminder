@@ -160,8 +160,9 @@ class ReasonTextGui(tk.Toplevel):
         super().__init__(master=parent)
         # self.geometry("400x250")
         self.attributes('-topmost', True)
-        self.transient(parent) # Make the top-level window transient to the main window
-        self.grab_set() # Prevent interaction with the main window while the top-level window is open
+        # Make the top-level window transient to the main window
+        self.transient(parent)
+        self.grab_set()  # Prevent interaction with the main window while the top-level window is open
 
         ## INITIALIZE ##
         self.text = ""
@@ -186,11 +187,10 @@ class ReasonTextGui(tk.Toplevel):
         submit_button.pack(side='right', padx=5)
 
         # not in pixels but based on font size
-        self.text_box = tk.Text(master=self, width=30, height=10)
+        self.text_box = tk.Text(master=self, width=30, height=10,font=REASON_TEXT)
         self.text_box.pack(padx=5, pady=2, fill='x')
 
-        is_it_imp_label = tk.Label(
-            master=self, text="Is It Important than your Health? \n V:8600", font=BUTTON_FONT, foreground='#445EF2')
+        is_it_imp_label = tk.Label(master=self, text="Is It Important than your Health? \n V:8600",justify='center', font=BUTTON_FONT, foreground='#282a36')
         is_it_imp_label.pack(padx=2, pady=5)
 
     def save_reason(self):
@@ -251,7 +251,10 @@ class ExerciseTitle(ttk.Label):
     def __init__(self, parent=None, text=None, url: str = None, set_background: str = 'parent', *args, **kwargs):
 
         ## INITIALIZE ##
-        configure_styles()
+        style = ConfigureStyle()
+        style.theme_needed()
+        style.title_label()
+        # configure_styles()
         self.url = url
 
         if set_background == 'parent':
@@ -316,11 +319,13 @@ class ExerciseComboBox(ttk.Combobox):
     user_conditions = []
     combo_boxes_instances = []
     table_name = 'Exercise'
-
-    def __init__(self, parent=None, column_name=None, string_var=None):
+    
+    
+    def __init__(self, parent=None, column_name=None, string_var=None, default=''):
         label_frame = ttk.Labelframe(master=parent, text=column_name)
         label_frame.pack()
-        super().__init__(master=label_frame, state='readonly', font=ICON_FONT)
+        
+        super().__init__(master=label_frame, state='readonly', font=ICON_FONT,)
         # COMMUNICATION BETWEEN INSTANCES
         ## CHECK THE LENGTH OF USER_CONDITIONS ##
         self.this_instance_index = len(ExerciseComboBox.user_conditions)
@@ -332,7 +337,7 @@ class ExerciseComboBox(ttk.Combobox):
         # INITIALIZE, using in class methods
         self.column_name = column_name
         # self.selection = tk.StringVar(value=column_name) ## use this to have default name
-        self.selection = tk.StringVar()
+        self.selection = tk.StringVar(value=default)
         self.string_var = string_var
 
         self['textvariable'] = self.selection
@@ -434,20 +439,19 @@ class LabelAndEntry(tk.Frame):
 
 
 class OnlineIntergration(ttk.Notebook):
-    def __init__(self, parent=None,setting_dict: dict = {}):
-        super().__init__(master=parent)
+    def __init__(self, parent=None, setting_dict: dict = {}):
+        super().__init__(master=parent,style='TNotebook')
 
         self.name_in_dict = 'Integration setting'
         self.integrate_obj_dict = {}  # Frame Instances are stored ##
-
 
         online_integration = setting_dict[self.name_in_dict]
 
         # self.configure(style=ConfigureStyle().TNotebook())
 
         ## Create frame ##
-        self.integrate_obj_dict['Notion'] = self.NotionTab(self,online_integration.get('Notion',{}))
-        self.integrate_obj_dict['Potion'] = self.NotionTab(self)
+        self.integrate_obj_dict['Notion'] = self.NotionTab(self,notion_setting=online_integration.get('Notion', {}))
+        # self.integrate_obj_dict['Potion'] = self.NotionTab(self)
 
         ## Add frames to notebook ##
         for name, frame_obj in self.integrate_obj_dict.items():
@@ -459,7 +463,7 @@ class OnlineIntergration(ttk.Notebook):
             data[name] = (frame_obj.get_info())
         return {self.name_in_dict: data}
 
-    class NotionTab(tk.Frame):
+    class NotionTab(ttk.Frame):
         '''
         sample_dict = {
         "notion": {
@@ -470,25 +474,30 @@ class OnlineIntergration(ttk.Notebook):
     }
         '''
 
-        def __init__(self, parent,notion_setting :dict ={}):
-            super().__init__(parent)
-            
+        def __init__(self, parent, notion_setting: dict = {}):
+            super().__init__(parent,style= 'TFrame')
+
             self.widgets = {}
             self.vars = {}
 
-            self.vars['save'] = tk.BooleanVar(value=notion_setting.get('save',False))
-            self.vars['api'] = tk.StringVar(value=notion_setting.get('api',''))
-            self.vars['page_id'] = tk.StringVar(value=notion_setting.get('page_id',''))
+            self.vars['save'] = tk.BooleanVar(
+                value=notion_setting.get('save', False))
+            self.vars['api'] = tk.StringVar(
+                value=notion_setting.get('api', ''))
+            self.vars['page_id'] = tk.StringVar(
+                value=notion_setting.get('page_id', ''))
 
-            self.widgets['save'] = ttk.Checkbutton(
-                self, text="Save to notion", variable=self.vars['save'], command=self.show, onvalue=True, offvalue=False)
+            self.widgets['save'] = ttk.Checkbutton(self, text="Save to notion", 
+                                                   variable=self.vars['save'], 
+                                                   command=self.show, onvalue=True, 
+                                                   offvalue=False)
             self.widgets['save'].pack(pady=5)
 
             self.widgets['api'] = LabelAndEntry(self, label_name='Api-key',
                                                 tk_var=self.vars['api'])
             self.widgets['api'].pack(fill='x', padx=5, pady=5)
 
-            self.widgets['page_id'] = LabelAndEntry(self, label_name='Page-id', 
+            self.widgets['page_id'] = LabelAndEntry(self, label_name='Page-id',
                                                     tk_var=self.vars['page_id'])
             self.widgets['page_id'].pack(fill='x', padx=5, pady=5)
 
@@ -501,10 +510,10 @@ class OnlineIntergration(ttk.Notebook):
                 self.notify_label.configure(text='Fields cannot be empty')
                 self.after(3000, lambda: self.notify_label.configure(text=''))
 
-        def get_info(self):    
+        def get_info(self):
             dict = {}
             for widget_name in self.widgets.keys():
-                dict[widget_name] = self.vars[widget_name].get()    
+                dict[widget_name] = self.vars[widget_name].get()
             return dict
 
 
@@ -529,7 +538,8 @@ if __name__ == '__main__':
     root.geometry('200x200')
 
     root.attributes("-topmost", True)
-    OnlineIntergration(root).pack(expand=True, fill='both')
+    # OnlineIntergration(root).pack(expand=True, fill='both')
+    ReasonTextGui(root)
 
     print('will this be executed')
 

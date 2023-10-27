@@ -5,7 +5,9 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import font
 from src.Gui.ImageFunctions import MyImage, CircleImgIcon, CanvasWithShape
-from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle, CustomFrame, DisableInteractionWithOtherWindow,ReasonTextGui
+from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle, CustomFrame, DisableInteractionWithOtherWindow, ReasonTextGui, ButtonWithParentBackground
+from src.Gui.Exercise_setting_Gui import SettingGui
+
 from src.Exerciselog import ExerciseLog
 from src.Gui.styles import configure_styles
 from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR
@@ -25,11 +27,11 @@ class NotificationGui(tk.Tk):
     def __init__(self, exercise_dict: dict = default_information):
         super().__init__()
         self.title("HIDE THIS")
-        # self.resizable(False, False)
-        # self.overrideredirect(True)
+        self.resizable(False, False)
+        self.overrideredirect(True)
         self.geometry("400x250")
         self.attributes('-topmost', True)
-        configure_styles()
+        # configure_styles()
         # self['bg'] = 'cyan'
 
         ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##
@@ -47,6 +49,18 @@ class NotificationGui(tk.Tk):
             expand=True, fill='both')
         # ).grid(row=1, column=0, sticky='news' )
 
+        self.bind("<Button-3>", self.right_click)
+
+    def right_click(self, event):
+        print("Right click", event.x_root, event.y_root)
+        context_menu = tk.Menu(self, tearoff=0)
+        context_menu.add_command(label="settings",
+                                 command=self.open_settings)
+        context_menu.post(event.x_root, event.y_root)
+
+    def open_settings(self):
+        setting_gui = SettingGui(parent=self)
+        SetWindowPosition.for_tk(setting_gui,(0,0,'c'))
 
 class SetWindowPosition:
     @staticmethod
@@ -88,48 +102,12 @@ class SetWindowPosition:
         window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
         # window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
-    @staticmethod
-    def for_ctk(window, position=(15, 25, 'se')):
-        '''
-        # ignore this not yet implemented
-        '''
-        print('pending work setwindow position for ctk')
-        window.update()  # Actualize geometry
-        anchor = position[-1]
-        screen_w = window.winfo_screenwidth()
-        screen_h = window.winfo_screenheight()
-        # print(window.winfo_width())
-        top_w = window.winfo_width()  # // 2
-        top_h = window.winfo_height()  # // 2
-
-        # x_anchor = "-" if "w" not in anchor else 1
-        # y_anchor = "-" if "n" not in anchor else "+"
-
-        if 'e' in anchor:
-            xpos = screen_w - top_w
-        elif 'w' in anchor:
-            xpos = position[0] - top_w
-        else:
-            xpos = position[0]
-
-        # Calculate vertical position
-        if 's' in anchor:
-            ypos = screen_h - top_h
-        elif 'n' in anchor:
-            ypos = position[1] - top_h
-        else:
-            ypos = position[1]
-        window.geometry(f"{xpos}+{ypos}")
-        # window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
-
 # top section
 
 
 class ImageFrame(tk.Frame):
     def __init__(self, parent, *args, **kwargs):
-        super().__init__(master=parent,
-
-                         *args, **kwargs)
+        super().__init__(master=parent,*args, **kwargs)
 
         self.create_canvas()
 
@@ -156,12 +134,12 @@ class BottomContainer(tk.Frame):
         super().__init__(master=parent,
                          background=BACKGROUND_COLOR,
                          *args, **kwargs)
-
-        text_frame = ExerciseTitle(self,
-                                   text=exercise_dict['name'],
-                                   anchor='w',
-                                   url=exercise_dict['url'],
-                                   ).pack(fill='x', pady=(15, 2))
+        # setting = ButtonWithParentBackground(master=self,text='setting',)
+        title = ExerciseTitle(self,
+                              text=exercise_dict['name'],
+                              anchor='w',
+                              url=exercise_dict['url'],
+                              ).pack(fill='x', pady=(15, 2))
 
         # separator = ttk.Separator(self, orient='horizontal').pack(fill='x')
         separator = tk.Frame(self, borderwidth=10, relief='groove',
@@ -196,8 +174,7 @@ class IconStructure(tk.Frame):
                               height=40, fg_img_path=path)
         icon1.pack()
 
-        ttk.Label(master=self, text=text,
-                  ).pack(pady=5)
+        ttk.Label(master=self, text=text).pack(pady=5)
 
 
 class VisualFrame(CustomFrame):
@@ -257,9 +234,10 @@ class ActionButtonsFrame(CustomFrame):
 
         if height is not None:
             self.grid_propagate(0)  # forcing the frame to take assigned height
+
+        configure_styles()
         # Later buttons
-        later_button = LaterButton(master=self, text='Later',
-                                   callback_func=lambda: self.create_entry(exercise_dict, is_completed=False))
+        later_button = LaterButton(master=self, text='Later',callback_func=lambda: self.create_entry(exercise_dict, is_completed=False))
         # lambda event: because it is tag_binded to text
         later_button.grid(row=0, column=0, sticky='nsew', padx=5,)
 
@@ -279,17 +257,15 @@ class ActionButtonsFrame(CustomFrame):
 
         exercise_log.set_completed(is_completed)
         # exercise_log.add_reason()
-        
-        if is_completed is False: ## Get REason for not doing ##            
+
+        if is_completed is False:  # Get REason for not doing ##
             root = self.winfo_toplevel()
-            reason_gui = ReasonTextGui(parent=root,exercise_log=exercise_log)
+            reason_gui = ReasonTextGui(parent=root, exercise_log=exercise_log)
+            SetWindowPosition.for_tk(reason_gui,(0,0,'c'))
 
         elif is_completed is True:
             exercise_log.add_entry_to_database()
             self.destroyed()
-
-
-    
 
     def destroyed(self) -> None:
         try:

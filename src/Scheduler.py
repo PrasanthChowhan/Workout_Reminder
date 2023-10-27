@@ -4,7 +4,8 @@ import schedule
 
 import time
 from src.Gui.Gui_Main import NotificationGui
-from DbManager import DbManager
+from DbManager import DbManager,ConfigReader
+from src.utils.constants import DatabaseConstants
 # NOTE: Run Gui on main thread or else it will throw errors
 
 
@@ -19,6 +20,8 @@ def schedule_gui():
 if __name__ == '__main__':
 
     schedule.every().second.do(schedule_gui)
+    configuration = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+    schedule_after = int(configuration['schedule'])*60 # sleep is in seconds and interval is in min
     while True:
         schedule.run_pending()
-        time.sleep(5)
+        time.sleep(schedule_after)

@@ -37,7 +37,12 @@ class ConfigureStyle:
                     
                     font=TITLE_FONT)
         
-        
+    def exercise_combobox(self):
+        self.style.configure('Exercise.TCombobox',
+                             borderwidth = 0,
+                             highlightthickness=0,
+                             relief='ridge')
+
         
         ## COMMENT OUT IF YOU DON'T WANT OUTLINE ON HOVER ##
         # s.map('Title.TLabel',    
@@ -73,9 +78,26 @@ def configure_styles():
                 foreground=TITLE_FOREGROUND_COLOR,
                 borderwidth = 0,
                 highlightthickness=0,
-                relief= 'ridge',
+                relief= 'flat',
                 
                 font=TITLE_FONT)
+    
+    s.configure("Exercise.TCombobox", 
+        background="lightgray", 
+        foreground="black",
+        selectbackground="lightblue",
+        selectforeground="black",
+        font=("Segoe UI", 12),
+        fieldbackground="lightgray",
+        fieldforeground="black",
+        borderwidth = 1,
+        ridge= 'flat'
+    )
+
+    s.map("Exercise.TCombobox", 
+        arrowcolor=[("active", "blue"), ("disabled", "gray")]
+    )
+
     
     
     

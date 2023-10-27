@@ -1,0 +1,4 @@
+pillow
+pyyaml
+requests
+schedule

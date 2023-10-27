@@ -1,16 +1,15 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import font
 import time
 from src.Gui.gui_settings import *
-from src.Gui.styles import configure_styles, ConfigureStyle
+from src.Gui.styles import configure_styles
 from src.Gui.ImageFunctions import MyImage
 from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import DatabaseConstants
 import webbrowser
-from src.DbManager import ConfigReader
 
 
+## FOR CHECKING SPEED OF DEF ##
 def timing_decorator(func):
     def wrapper(*args, **kwargs):
         start_time = time.time()
@@ -83,7 +82,7 @@ class LaterButton(CanvasWithParentBackground):
         root.update_idletasks()
         self.width = event.width
         self.height = event.height
-        print(f'width = {self.width}, height = {self.height}')
+        # print(f'width = {self.width}, height = {self.height}')
 
         self._background_width = 0
         self._animation_id = None  # for cancelling .after fucntion
@@ -133,7 +132,6 @@ class LaterButton(CanvasWithParentBackground):
                 self.animation_speed, self._background_animation)
 
         else:  # what to do after progress bar reaching end
-            print('unlocked later button')
             self.itemconfigure(
                 'text_canvas',
                 fill=self.unlocked_text_color,
@@ -187,10 +185,12 @@ class ReasonTextGui(tk.Toplevel):
         submit_button.pack(side='right', padx=5)
 
         # not in pixels but based on font size
-        self.text_box = tk.Text(master=self, width=30, height=10,font=REASON_TEXT)
+        self.text_box = tk.Text(master=self, width=30,
+                                height=10, font=REASON_TEXT)
         self.text_box.pack(padx=5, pady=2, fill='x')
 
-        is_it_imp_label = tk.Label(master=self, text="Is It Important than your Health? \n V:8600",justify='center', font=BUTTON_FONT, foreground='#282a36')
+        is_it_imp_label = tk.Label(master=self, text="Is It Important than your Health? \n V:8600",
+                                   justify='center', font=BUTTON_FONT, foreground='#282a36')
         is_it_imp_label.pack(padx=2, pady=5)
 
     def save_reason(self):
@@ -251,10 +251,7 @@ class ExerciseTitle(ttk.Label):
     def __init__(self, parent=None, text=None, url: str = None, set_background: str = 'parent', *args, **kwargs):
 
         ## INITIALIZE ##
-        style = ConfigureStyle()
-        style.theme_needed()
-        style.title_label()
-        # configure_styles()
+        configure_styles()
         self.url = url
 
         if set_background == 'parent':
@@ -263,7 +260,7 @@ class ExerciseTitle(ttk.Label):
             color = set_background
 
         ## OPERATIONS BEFORE CREATING ##
-        text = text.title()  # TITLING THE STRING
+        text = text.title()  # TITLEING THE STRING
 
         super().__init__(master=parent,
                          text=text,
@@ -319,12 +316,11 @@ class ExerciseComboBox(ttk.Combobox):
     user_conditions = []
     combo_boxes_instances = []
     table_name = 'Exercise'
-    
-    
+
     def __init__(self, parent=None, column_name=None, string_var=None, default=''):
         label_frame = ttk.Labelframe(master=parent, text=column_name)
         label_frame.pack()
-        
+
         super().__init__(master=label_frame, state='readonly', font=ICON_FONT,)
         # COMMUNICATION BETWEEN INSTANCES
         ## CHECK THE LENGTH OF USER_CONDITIONS ##
@@ -377,7 +373,9 @@ class ExerciseComboBox(ttk.Combobox):
 
             # you want the conditions untill the current instance
             conditions = cls.user_conditions[:current_instance_index+1]
-            print(conditions)
+            # print(conditions)
+        
+
             list = SqliteDefs.get_distinct_column_values(cls.table_name,
                                                          instance.column_name,
                                                          DatabaseConstants.EXERCISE_DB_PATH,
@@ -438,85 +436,6 @@ class LabelAndEntry(tk.Frame):
             return False
 
 
-class OnlineIntergration(ttk.Notebook):
-    def __init__(self, parent=None, setting_dict: dict = {}):
-        super().__init__(master=parent,style='TNotebook')
-
-        self.name_in_dict = 'Integration setting'
-        self.integrate_obj_dict = {}  # Frame Instances are stored ##
-
-        online_integration = setting_dict[self.name_in_dict]
-
-        # self.configure(style=ConfigureStyle().TNotebook())
-
-        ## Create frame ##
-        self.integrate_obj_dict['Notion'] = self.NotionTab(self,notion_setting=online_integration.get('Notion', {}))
-        # self.integrate_obj_dict['Potion'] = self.NotionTab(self)
-
-        ## Add frames to notebook ##
-        for name, frame_obj in self.integrate_obj_dict.items():
-            self.add(frame_obj, text=name)
-
-    def get_info(self):
-        data = {}
-        for name, frame_obj in self.integrate_obj_dict.items():
-            data[name] = (frame_obj.get_info())
-        return {self.name_in_dict: data}
-
-    class NotionTab(ttk.Frame):
-        '''
-        sample_dict = {
-        "notion": {
-            'save' : True,
-            'api_key' : 'edadt03f-dga3-5e32-secret',
-            'page_id' : '3etadgggaerasd'
-        }
-    }
-        '''
-
-        def __init__(self, parent, notion_setting: dict = {}):
-            super().__init__(parent,style= 'TFrame')
-
-            self.widgets = {}
-            self.vars = {}
-
-            self.vars['save'] = tk.BooleanVar(
-                value=notion_setting.get('save', False))
-            self.vars['api'] = tk.StringVar(
-                value=notion_setting.get('api', ''))
-            self.vars['page_id'] = tk.StringVar(
-                value=notion_setting.get('page_id', ''))
-
-            self.widgets['save'] = ttk.Checkbutton(self, text="Save to notion", 
-                                                   variable=self.vars['save'], 
-                                                   command=self.show, onvalue=True, 
-                                                   offvalue=False)
-            self.widgets['save'].pack(pady=5)
-
-            self.widgets['api'] = LabelAndEntry(self, label_name='Api-key',
-                                                tk_var=self.vars['api'])
-            self.widgets['api'].pack(fill='x', padx=5, pady=5)
-
-            self.widgets['page_id'] = LabelAndEntry(self, label_name='Page-id',
-                                                    tk_var=self.vars['page_id'])
-            self.widgets['page_id'].pack(fill='x', padx=5, pady=5)
-
-            ## NOTIFY LABEL ##
-            self.notify_label = ttk.Label(self, text='', anchor=tk.CENTER)
-            self.notify_label.pack(fill='x', padx=5, pady=5)
-
-        def show(self):
-            if self.widgets['api'].is_entry_empty() or self.widgets['page_id'].is_entry_empty():
-                self.notify_label.configure(text='Fields cannot be empty')
-                self.after(3000, lambda: self.notify_label.configure(text=''))
-
-        def get_info(self):
-            dict = {}
-            for widget_name in self.widgets.keys():
-                dict[widget_name] = self.vars[widget_name].get()
-            return dict
-
-
 class IntervalEntry(ttk.Entry):
     def __init__(self, parent=None, *args, **kwargs):
         super().__init__(master=parent, *args, **kwargs)
@@ -536,24 +455,6 @@ class IntervalEntry(ttk.Entry):
 if __name__ == '__main__':
     root = tk.Tk()
     root.geometry('200x200')
-
     root.attributes("-topmost", True)
-    # OnlineIntergration(root).pack(expand=True, fill='both')
     ReasonTextGui(root)
-
-    print('will this be executed')
-
-    # ttk.Button(root,text='one',name= 'btn_i_did_it').pack(expand=True,fill='x',)
-    # ExerciseIcon(root, r'C:\Scripts\01_PYTHON\Projects\Workout_Reminder\resources\icons\muscle.png',
-    #              text='snorlax',
-    #              set_background='red').pack(padx=10, pady=10)
-    # ExerciseComboBox(parent=root, column_name='equipment').pack(
-    #     fill='x', padx=5, pady=5)
-    # ExerciseComboBox(parent=root, column_name='muscle').pack(
-    #     fill='x', padx=5, pady=5)
-    # ExerciseComboBox(parent=root, column_name='difficulty').pack(
-    #     fill='x', padx=5, pady=5)
-    # ExerciseComboBox(parent=root,table_name='Exercise',column_name='muscle').pack(expand=True,fill='x')
-    # label = ExerciseTitle(root,text= 'working underline',).pack()
-    # DisableInteractionWithOtherWindow(parent=root)
     root.mainloop()

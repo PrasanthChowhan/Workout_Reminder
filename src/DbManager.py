@@ -1,12 +1,7 @@
-import sqlite3,os,pprint
+import os
 import yaml
-
-
 import random as rnd
-# this is custom package will be present in learning respository
-# from python_learned.Sqlite import SqliteDefs
 from src.utils.SQLITE import SqliteDefs
-
 from src.utils.constants import *
 
 '''
@@ -150,9 +145,9 @@ class ConfigReader:
 class DbManager:
     def __init__(self):
         # initialize
-        self.config_file_path       = SETTINGS_YAML_PATH
-        self.exercise_database_path = EXERCISE_DB_PATH
-        self.exercise_log_path      = EXERCISE_LOG_PATH
+        self.config_file_path       = DatabaseConstants.SETTINGS_YAML_PATH
+        self.exercise_database_path = DatabaseConstants.EXERCISE_DB_PATH
+        self.exercise_log_path      = DatabaseConstants.EXERCISE_LOG_PATH
 
     def give_me_a_exercise(self) -> dict:
         '''
@@ -197,9 +192,9 @@ class DbManager:
         return condition_list
 class ExerciseDatabase:
     def __init__(self):
-        self.exercise_db_path = EXERCISE_DB_PATH
-        self.exercise_log_path = EXERCISE_LOG_PATH
-        self.exercise_log_table_name = EXERCISE_LOG_TABLE_NAME
+        self.exercise_db_path = DatabaseConstants.EXERCISE_DB_PATH
+        self.exercise_log_path = DatabaseConstants.EXERCISE_LOG_PATH
+        self.exercise_log_table_name = DatabaseConstants.EXERCISE_LOG_TABLE_NAME
 
     def next_muscle(self)-> str:
         '''Returns the next exercise
@@ -217,7 +212,7 @@ class ExerciseDatabase:
         last_muscle_id = last_muscle_targetted_dict[0]['muscle_id'] # list of dictionaries so to remove the list
     
         next_muscle_dict = SqliteDefs.get_next_entry(self.exercise_db_path,'Muscles','muscle_id',last_muscle_id)
-        print('next_muscle_dicct',next_muscle_dict)
+        # print('next_muscle_dicct',next_muscle_dict)
         return next_muscle_dict['muscle']
 
     def select_matching(self,query_conditions, only_one=False, random=False) -> dict:
@@ -232,7 +227,7 @@ class ExerciseDatabase:
                                                                        query_with_removed_difficiculty)
 
 
-        print('Query conditions:', query_conditions)
+        # print('Query conditions:', query_conditions)
         if only_one and exercises_matching_condition and not random:
             return exercises_matching_condition[0]  # return first element
         elif only_one and random and exercises_matching_condition:  # return random

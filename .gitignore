@@ -1,10 +1,9 @@
 **.pyc
 **/__pycache__/
-*tests/
+
 *.egg-info/
 *.vscode/
 
-Archieved/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

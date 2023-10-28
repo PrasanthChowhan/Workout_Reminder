@@ -1,11 +1,11 @@
 Integration setting:
   Notion:
-    api: 
-    database_id: 
-    page_id: 
-    save: False
+    api: ''
+    database_id: ''
+    page_id: ''
+    save: false
 database:
-  difficulty: advanced
-  equipment: bodyweight
-  muscle: default
+  difficulty: ''
+  equipment: ''
+  muscle: ''
 schedule: '45'

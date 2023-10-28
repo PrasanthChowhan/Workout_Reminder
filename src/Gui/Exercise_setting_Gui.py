@@ -2,7 +2,9 @@ from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, La
 import tkinter as tk
 from tkinter import ttk
 from src.DbManager import ConfigReader
-from src.utils.constants import DatabaseConstants
+from src.utils.constants import DatabaseConstants,WebLinks
+from src.GitCommands import GitCommands
+import webbrowser
 
 
 class SettingGuiStandalone(tk.Tk):
@@ -56,15 +58,14 @@ class SettingNotebook(ttk.Notebook):
                          )
 
         ## {} if file not found ##
-        setting_dict = ConfigReader(
-            DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        setting_dict = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
 
         self.tab = {}
         ## CREATE FRAME ##
-        self.tab['Exercise'] = MuscleSetting(
-            parent=self, setting_dict=setting_dict['database'])
-        self.tab['Save to'] = OnlineIntergration(parent=self,
-                                                 setting_dict=setting_dict)
+        self.tab['Exercise'] = MuscleSetting(parent=self, setting_dict=setting_dict.get('database',{}))
+        self.tab['Save to'] = OnlineIntergration(parent=self,setting_dict=setting_dict)
+        self.tab['update'] = update_feedback(parent=self)
+
         test_frame = tk.Frame(master=self)
 
         ## ADD FRAME TO NOTEBOOK ##
@@ -77,8 +78,7 @@ class SettingNotebook(ttk.Notebook):
         for instance in self.tab.values():
             all_dict_combined.update(instance.get_info())
 
-        ConfigReader().update_or_create_yaml_file(
-            DatabaseConstants.SETTINGS_YAML_PATH, all_dict_combined)
+        ConfigReader().update_or_create_yaml_file(DatabaseConstants.SETTINGS_YAML_PATH, all_dict_combined)
 
 
 class MuscleSetting(ttk.Frame):
@@ -192,11 +192,10 @@ class OnlineIntergration(ttk.Notebook):
         self.name_in_dict = 'Integration setting'
         self.integrate_obj_dict = {}  # Frame Instances are stored ##
 
-        online_integration = setting_dict[self.name_in_dict]
+        online_integration = setting_dict.get(self.name_in_dict,{})
 
         ## Create frame ##
-        self.integrate_obj_dict['Notion'] = self.NotionTab(
-            self, notion_setting=online_integration.get('Notion', {}))
+        self.integrate_obj_dict['Notion'] = self.NotionTab(self, notion_setting=online_integration.get('Notion', {}))
         # self.integrate_obj_dict['Potion'] = self.NotionTab(self)
 
         ## Add frames to notebook ##
@@ -267,8 +266,36 @@ class OnlineIntergration(ttk.Notebook):
                 dict[widget_name] = self.vars[widget_name].get()
             return dict
 
-class app_info(ttk.Frame):
-    pass
+class update_feedback(ttk.Frame):
+    def __init__(self,parent=None):
+        super().__init__(master=parent)
+        
+
+        ttk.Button(self,text='Check for updates',command= self.check_for_updates,cursor='hand2').pack(padx=5,pady=5)
+
+        self.msg_var = tk.StringVar(value='')
+        self.label=ttk.Label(self,textvariable=self.msg_var,justify='center',anchor='center')
+        self.update_button=ttk.Button(self,textvariable=self.msg_var,command=GitCommands.update_app)
+
+
+        ttk.Button(self,text='help us improve by providing your feedback',command=self.open_feedback,cursor='hand2').pack(side='bottom',pady=2)
+
+    def check_for_updates(self): ## IF UPDATE IS AVAILABLE BUTTON IS SHOWN FOR PULLING/UPDATIN ##
+        status = GitCommands.check_for_update()
+        self.msg_var.set(value=status)
+
+        if status == 'Update available':
+            self.update_button.pack(padx=5,pady=5)
+        else:
+            self.label.pack(padx=5,pady=5,fill= 'x')
+
+    def open_feedback(self):
+        webbrowser.open(WebLinks.GOOGLE_FORMS)
+           
+
+    
+    def get_info(self): # mandatory 
+        return {}
 
 if __name__ == '__main__':
     SettingGuiStandalone()

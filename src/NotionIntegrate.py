@@ -4,6 +4,13 @@ from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import DatabaseConstants
 from src.DbManager import ConfigReader
 
+def check_requirements(func):
+    def wrapper(self, *args, **kwargs):
+        if self.save:
+            return func(self, *args, **kwargs)
+        else:
+            print(f"Requirements not met. function '{func.__name__}' not executed.")
+    return wrapper
 
 class NotionIntergrate:
     def __init__(self):
@@ -11,22 +18,26 @@ class NotionIntergrate:
         self.pageurl = "https://api.notion.com/v1/pages"
         # self.NOTION_API_KEY = ""
         # self.PAGE_ID = ""
+        settings = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        self.notion_settings = settings.get('Integration setting', {}).get('Notion',{})
+        print('notoin settins ',self.notion_settings)
+
+        self.NOTION_API_KEY = self.notion_settings.get('api','')
+        self.PAGE_ID = self.notion_settings.get('page_id','')
+
         self.headers = {
             "Authorization": self.NOTION_API_KEY,
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28"
         }
 
-        settings = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
-        self.notion_settings = settings.get('Integration setting', {}).get('Notion')
 
-        self.NOTION_API_KEY = self.notion_settings['api']
-        self.PAGE_ID = self.notion_settings['page_id']
+        self.save = self.notion_settings.get('save', False)
 
         # self.notion_settings= get_nested_dict_value(settings,'Notion')
         if self.notion_settings:
             ## get save value, any error during retriving default False ##
-            if self.notion_settings.get('save', False):
+            if self.save:
 
                 # CHECK IF DBID EXISTS IF NOT CREATE DATABASE
                 self.database_id = self.notion_settings.get('database_id', None)
@@ -103,7 +114,8 @@ class NotionIntergrate:
         response_data = self.send_request(self.DBURL, data)
         database_id = response_data['id']
         return database_id
-
+    
+    @check_requirements
     def add_row_to_database(self, user_log: dict = {}):
 
         ## USE KEYS FROM EXERCISELOG ##

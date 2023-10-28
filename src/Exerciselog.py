@@ -55,8 +55,7 @@ class ExerciseLog:
 
         threading.Thread(target=lambda: SqliteDefs.insert_data_into_table(
             DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
-        threading.Thread(target=lambda: NotionIntergrate(
-        ).add_row_to_database(self.log_entry)).start()
+        threading.Thread(target=lambda: NotionIntergrate().add_row_to_database(self.log_entry)).start()
 
     def get_log_entry(self):
         return self.log_entry

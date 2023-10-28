@@ -407,7 +407,7 @@ class ExerciseComboBox(ttk.Combobox):
 
 
 class LabelAndEntry(tk.Frame):
-    def __init__(self, parent, label_name="test", tk_var=None):
+    def __init__(self, parent, label_name="test", tk_var=None,**kwargs):
         super().__init__(parent)
 
         self.rowconfigure(0, weight=1, uniform='a')
@@ -417,7 +417,7 @@ class LabelAndEntry(tk.Frame):
         self.label = ttk.Label(self, text=label_name)
         self.label.grid(row=0, column=0, sticky='news')
 
-        self.entry = tk.Entry(self, textvariable=tk_var)
+        self.entry = tk.Entry(self, textvariable=tk_var,**kwargs)
         self.entry.grid(row=0, column=1, sticky='news')
 
     def get(self):

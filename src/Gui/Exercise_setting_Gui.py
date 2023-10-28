@@ -15,7 +15,7 @@ class SettingGuiStandalone(tk.Tk):
 class SettingGui(tk.Toplevel):
     def __init__(self, parent=None, standalone=False):
 
-        super().__init__(master=parent, background='red')
+        super().__init__(master=parent)
         if standalone is False:
             self.transient(parent)
             self.grab_set()
@@ -249,8 +249,7 @@ class OnlineIntergration(ttk.Notebook):
                                                     tk_var=self.vars['page_id'])
             self.widgets['page_id'].pack(fill='x', padx=5, pady=5)
 
-            self.widgets['database_id'] = LabelAndEntry(
-                self, label_name='Database-id', tk_var=self.vars['database_id'])
+            self.widgets['database_id'] = LabelAndEntry(self, label_name='Database-id', tk_var=self.vars['database_id'],state= 'disabled')
             self.widgets['database_id'].pack(fill='x', padx=5, pady=5)
 
             ## NOTIFY LABEL ##
@@ -268,6 +267,8 @@ class OnlineIntergration(ttk.Notebook):
                 dict[widget_name] = self.vars[widget_name].get()
             return dict
 
+class app_info(ttk.Frame):
+    pass
 
 if __name__ == '__main__':
     SettingGuiStandalone()

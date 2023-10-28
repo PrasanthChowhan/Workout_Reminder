@@ -9,8 +9,8 @@ class NotionIntergrate:
     def __init__(self):
         self.DBURL = "https://api.notion.com/v1/databases/"
         self.pageurl = "https://api.notion.com/v1/pages"
-        self.NOTION_API_KEY = "secret_pQDRHWjHeuQKobzHR13o427U1fmr5YCmlg5wl5tcO7j"
-        self.PAGE_ID = "a88edc8d512c451798c284b88f70b9f1"
+        # self.NOTION_API_KEY = ""
+        # self.PAGE_ID = ""
         self.headers = {
             "Authorization": self.NOTION_API_KEY,
             "Content-Type": "application/json",
@@ -20,8 +20,8 @@ class NotionIntergrate:
         settings = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
         self.notion_settings = settings.get('Integration setting', {}).get('Notion')
 
-        # self.NOTION_API_KEY = self.notion_settings['api']
-        # self.PAGE_ID = self.notion_settings['page_id']
+        self.NOTION_API_KEY = self.notion_settings['api']
+        self.PAGE_ID = self.notion_settings['page_id']
 
         # self.notion_settings= get_nested_dict_value(settings,'Notion')
         if self.notion_settings:
@@ -158,7 +158,7 @@ class NotionIntergrate:
                     "date": {
                         "start": user_log.get('date_time', "1999-09-09T09:09:09"),
                         "end": None,
-                        # "time_zone": "Asia/Kolkata"
+                        "time_zone": 'Asia/Kolkata'
                     }
                 }
             }

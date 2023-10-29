@@ -182,10 +182,13 @@ class MuscleSetting(ttk.Frame):
         equipment_entry_value = self.equipment_combi.get()
         # check if the user selected equipment or not
         if self.check_interval_entry():
+            self.muscle_combi.configure(state='disabled') # disable muscle combi if target all muscle is selected
             if self.equipment_combi.get() and self.difficulty_combi.get():
                 pass
             else:
                 self.notify_var.set('Select Equipment and Difficulty')
+        else:
+            self.muscle_combi.configure(state='enabled') # enable muscle combi
 
 
 class OnlineIntergration(ttk.Notebook):

@@ -9,4 +9,5 @@ if %errorlevel% equ 0 (
     pause
 )
 rem Open the Python script
+mkdir "data/user" 
 python src/Gui/Exercise_setting_Gui.py

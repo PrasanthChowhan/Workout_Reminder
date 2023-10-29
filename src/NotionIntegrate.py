@@ -20,7 +20,6 @@ class NotionIntergrate:
         # self.PAGE_ID = ""
         settings = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
         self.notion_settings = settings.get('Integration setting', {}).get('Notion',{})
-        print('notoin settins ',self.notion_settings)
 
         self.NOTION_API_KEY = self.notion_settings.get('api','')
         self.PAGE_ID = self.notion_settings.get('page_id','')

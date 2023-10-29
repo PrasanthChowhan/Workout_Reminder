@@ -1,13 +1,13 @@
 ############
 BACKGROUND_COLOR    = '#2c2c2c'
-SEPARATOR_COLOR     = 'red'
+SEPARATOR_COLOR     = '#E0E1E4'
 ## Title font ##
 TITLE_FONT      = ('Montserrat',15,'bold')
-TITLE_FONT_HOVER = ('Montserrat',15,'bold','roman','underline')
+TITLE_FONT_HOVER = (' ',15,'bold','roman','underline')
 TITLE_FOREGROUND_COLOR = '#FFC107'
 
 
-ICON_FONT = ('Montserrat Alternates SemiBold', 11,'bold')
+ICON_FONT = ('Montserrat Alternates SemiBold', 11,)
 ICON_SIZE = (40,40)
 ICON_LABEL_COLOR = '#FFFFFF'
 

@@ -35,6 +35,9 @@ class SettingGui(tk.Toplevel):
         self.standalone = standalone
         self.parent = parent
 
+        # icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
+        # self.iconphoto(True,icon)
+
         setting_notebook = SettingNotebook(parent=self)
         setting_notebook.pack(fill='both')
         save_button = ttk.Button(

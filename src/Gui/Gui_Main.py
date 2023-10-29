@@ -19,11 +19,14 @@ default_information = {'name': 'Default_Push-up',
 class NotificationGui(tk.Tk):
     def __init__(self, exercise_dict: dict = default_information):
         super().__init__()
-        self.title("HIDE THIS")
         self.resizable(False, False)
         self.overrideredirect(True)
         self.geometry("400x250")
         self.attributes('-topmost', True)
+
+        icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
+        self.iconphoto(True,icon)
+        
         configure_styles()
 
         ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##

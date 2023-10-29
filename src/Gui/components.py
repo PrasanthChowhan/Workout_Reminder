@@ -145,7 +145,7 @@ class LaterButton(CanvasWithParentBackground):
     def root_destroy(self, event):
         self.after(10, self.callback_func)
 
-
+ 
 class ReasonTextGui(tk.Toplevel):
     '''
     When user clicks on later, he/she is prompted with the reason gui. where one has to type the reason for not doing the exercise.
@@ -158,6 +158,7 @@ class ReasonTextGui(tk.Toplevel):
         super().__init__(master=parent)
         # self.geometry("400x250")
         self.attributes('-topmost', True)
+        self.title('why?')
         # Make the top-level window transient to the main window
         self.transient(parent)
         self.grab_set()  # Prevent interaction with the main window while the top-level window is open

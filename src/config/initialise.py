@@ -1,5 +1,6 @@
 import os,subprocess,shutil,platform
 from pathlib import Path
+from src.Gui.Exercise_setting_Gui import SettingGuiStandalone
 
 
 ## INSTALL REQUIREMENTS ##
@@ -65,6 +66,7 @@ def get_user_font_directory(): # for current user doesn't need admin permission
 if __name__ == "__main__":
     install_requiremnts('requirements.txt')
     create_directory_if_not_exists("data/user")
+    SettingGuiStandalone()
     # install_fonts('resources/fonts')
     
 

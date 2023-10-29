@@ -123,6 +123,14 @@ class GitCommands:
     @classmethod
     def update_app(cls):
         cls.git_pull(cls.repo_url)
+        
+        command = "pip install -e ."
+        # Run the command in the shell
+        try:
+            subprocess.run(command, shell=True, check=True)
+            print("Package installed successfully.")
+        except subprocess.CalledProcessError as e:
+            print(f"Error installing package: {e}")
 
 # def update_app():
 #     current_version = GitCommands.get_local_repository_version()

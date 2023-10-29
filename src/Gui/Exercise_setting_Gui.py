@@ -38,11 +38,16 @@ class SettingGui(tk.Toplevel):
         # icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
         # self.iconphoto(True,icon)
 
-        setting_notebook = SettingNotebook(parent=self)
-        setting_notebook.pack(fill='both')
-        save_button = ttk.Button(
-            master=self, text='Save', command=setting_notebook.save_all_data)
-        save_button.pack(fill='x')
+        self.setting_notebook = SettingNotebook(parent=self)
+        self.setting_notebook.pack(fill='both')
+        self.save_button = ttk.Button(master=self, text='Save', 
+                                 command=self.save_command)
+        self.save_button.pack(fill='x')
+
+    def save_command(self):
+        self.save_button.configure(text='Saving...',state='disabled')
+        self.setting_notebook.save_all_data()
+        self.after(200,lambda:self.save_button.configure(text='Save',state='normal'))
 
     def on_close(self):
         self.style.theme_use('default')
@@ -181,11 +186,17 @@ class MuscleSetting(ttk.Frame):
     def save_all_muscles_setting(self):
         equipment_entry_value = self.equipment_combi.get()
         # check if the user selected equipment or not
+        
         if self.check_interval_entry():
+            if self.cycle_muscle_var.get():
+                self.muscle_combi.configure(state='disabled') # disable muscle combi if target all muscle is selected
+            else:
+                self.muscle_combi.configure(state='normal') # enable muscle combi
             if self.equipment_combi.get() and self.difficulty_combi.get():
                 pass
             else:
                 self.notify_var.set('Select Equipment and Difficulty')
+            
 
 
 class OnlineIntergration(ttk.Notebook):

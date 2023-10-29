@@ -15,8 +15,9 @@ def schedule_gui():
 if __name__ == '__main__':
 
     schedule.every().second.do(schedule_gui)
-    configuration = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
-    schedule_after = int(configuration['schedule'])*60 # sleep is in seconds and interval is in min
+    
     while True:
         schedule.run_pending()
+        configuration = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        schedule_after = int(configuration['schedule'])*60 # sleep is in seconds and interval is in min
         time.sleep(schedule_after)

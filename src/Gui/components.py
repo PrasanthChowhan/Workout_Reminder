@@ -438,9 +438,9 @@ class LabelAndEntry(tk.Frame):
 
 
 class IntervalEntry(ttk.Entry):
-    def __init__(self, parent=None, *args, **kwargs):
+    def __init__(self, parent=None,default='', *args, **kwargs):
         super().__init__(master=parent, *args, **kwargs)
-        self.time_entry = tk.StringVar(value='45')
+        self.time_entry = tk.StringVar(value=default)
         self.configure(textvariable=self.time_entry,
                        #    relief='ridge',
                        justify=tk.CENTER)

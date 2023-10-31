@@ -188,7 +188,7 @@ class DbManager:
         for key, value in setting_dict.items():
 
             condition_list.append(f"{key}='{value}'")
-        print(condition_list)
+        # print(condition_list)
         return condition_list
 class ExerciseDatabase:
     def __init__(self):

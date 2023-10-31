@@ -24,8 +24,10 @@ class NotificationGui(tk.Tk):
         self.geometry("400x250")
         self.attributes('-topmost', True)
 
-        icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
-        self.iconphoto(True,icon)
+        
+        gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
+        self.iconphoto(True,gui_icon)
+       
         
         configure_styles()
 

@@ -7,12 +7,25 @@ from src.GitCommands import GitCommands
 import webbrowser
 
 
-class SettingGuiStandalone(tk.Tk):
+class SettingGuiStandalone:
     def __init__(self):
-        super().__init__()
-        self.withdraw()
-        SettingGui(parent=self, standalone=True)
-        self.mainloop()
+        self.close_gui_var = None
+        
+    def start_gui(self):
+        self.root = tk.Tk()
+        self.close_gui_var = tk.BooleanVar(value=False)
+        self.close_gui_var.trace_add('write',self.check_for_quit)
+        self.root.withdraw()
+        SettingGui(parent=self.root, standalone=True)
+        self.root.mainloop()
+
+    def get_close_gui_var(self):
+        return self.close_gui_var
+    
+    def check_for_quit(self,*args):
+        if self.close_gui_var:
+            self.root.destroy()
+
 
 class SettingGui(tk.Toplevel):
     def __init__(self, parent=None, standalone=False):
@@ -70,7 +83,7 @@ class SettingNotebook(ttk.Notebook):
 
         self.tab = {}
         ## CREATE FRAME ##
-        self.tab['Exercise'] = MuscleSetting(parent=self, setting_dict=setting_dict.get('database',{}))
+        self.tab['Exercise'] = MuscleSetting(parent=self, setting_dict=setting_dict)
         self.tab['Save to'] = OnlineIntergration(parent=self,setting_dict=setting_dict)
         self.tab['update'] = update_feedback(parent=self)
 
@@ -102,7 +115,7 @@ class MuscleSetting(ttk.Frame):
                                      text='Interval (min)')
         interval_icon.pack(side='left', fill='x', padx=10, pady=10)
 
-        self.interval_entry = IntervalEntry(timer_frame)
+        self.interval_entry = IntervalEntry(timer_frame,default=setting_dict.get('schedule',45))
         self.interval_entry.pack(side='left', fill='x', padx=10, pady=10)
 
         # MESSAGE
@@ -111,30 +124,32 @@ class MuscleSetting(ttk.Frame):
         self.notify_label.pack()
 
         ## COMBOBOX FRAME ##
+        combi_setting :dict = setting_dict.get('database',{})
+
         self.combo_frame = tk.Frame(master=self)
         self.combo_frame.pack(expand=True, fill='x')
 
         self.equipment_combi = ExerciseComboBox(parent=self.combo_frame,
                                                 column_name='equipment',
                                                 string_var=self.notify_var,
-                                                default=setting_dict.get('equipment', ''))
+                                                default=combi_setting.get('equipment', ''))
         self.equipment_combi.pack(fill='x', padx=5, pady=5)
 
         self.difficulty_combi = ExerciseComboBox(parent=self.combo_frame,
                                                  column_name='difficulty',
                                                  string_var=self.notify_var,
-                                                 default=setting_dict.get('difficulty', ''))
+                                                 default=combi_setting.get('difficulty', ''))
         self.difficulty_combi.pack(fill='x', padx=5, pady=5)
 
         self.muscle_combi = ExerciseComboBox(parent=self.combo_frame,
                                              column_name='muscle',
                                              string_var=self.notify_var,
-                                             default='' if setting_dict.get('muscle', 'default') == 'default' else setting_dict.get('muscle', ''))
+                                             default='' if combi_setting.get('muscle', 'default') == 'default' else combi_setting.get('muscle', ''))
         self.muscle_combi.pack(fill='x', padx=5, pady=5)
 
         ## This code will set self.cycle_muscle_var to True if the value of setting_dict['muscle'] is 'default', and it will set it to False for any other value. ##
         self.cycle_muscle_var = tk.BooleanVar(
-            value=setting_dict.get('muscle', '') == 'default')
+            value=combi_setting.get('muscle', '') == 'default')
         self.cycle_muscle = ttk.Checkbutton(master=self.combo_frame,
                                             text='Target all Muscles',
                                             command=self.save_all_muscles_setting,

@@ -2,8 +2,9 @@ from datetime import datetime
 from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import *
 from src.NotionIntegrate import NotionIntergrate
-import time
-import threading
+from src.utils.Create_csv import CreateCSV
+
+import time,threading
 
 
 def timing_decorator(func):
@@ -53,9 +54,12 @@ class ExerciseLog:
 
     def add_entry_to_database(self):
 
-        threading.Thread(target=lambda: SqliteDefs.insert_data_into_table(
-            DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
-        threading.Thread(target=lambda: NotionIntergrate().add_row_to_database(self.log_entry)).start()
+        threading.Thread(target=SqliteDefs.insert_data_into_table, 
+                         args=(DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
+        threading.Thread(target=NotionIntergrate().add_row_to_database,
+                         args=(self.log_entry)).start()
+        threading.Thread(target=CreateCSV, 
+                         args=(DatabaseConstants.CSV_PATH, self.log_entry)).start()
 
     def get_log_entry(self):
         return self.log_entry

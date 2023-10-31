@@ -195,5 +195,6 @@ if __name__ == '__main__':
     # root = ttkb.Window()
     # root.config(bg='blue')
     a = NotificationGui()
+    a.overrideredirect(False)
     a.mainloop()
     # root.mainloop()

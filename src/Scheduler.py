@@ -1,6 +1,6 @@
 import schedule
-import time
-import threading
+import time,threading,logging
+
 from src.Gui.Gui_Main import NotificationGui
 from src.DbManager import DbManager,ConfigReader
 from src.utils.constants import DatabaseConstants
@@ -13,6 +13,9 @@ def schedule_gui():
     root = NotificationGui(exercise_dict=exercise)
     root.mainloop()
 # NOTE: Run Gui on main thread or else it will throw errors
+
+
+
 
 
 def add_minutes_to_current_time(minutes_to_add):
@@ -33,7 +36,8 @@ def is_thread_exists(thread_name):
         if thread.name == thread_name:            
             return True
 
-
+# Configure the logging settings
+logging.basicConfig(filename='error_log.txt', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
 
 if __name__ == '__main__':
 
@@ -47,6 +51,7 @@ if __name__ == '__main__':
             configuration = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
             schedule_after = int(configuration['schedule'])
             tray.next_exercise_time = add_minutes_to_current_time(schedule_after)
+            print(add_minutes_to_current_time(schedule_after))
             # time.sleep(5)
             time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
 
@@ -56,6 +61,7 @@ if __name__ == '__main__':
                 tray.close_setting_gui()
             
             schedule.run_pending()
-        except:
+        except Exception as e:
+            logging.error("An error occurred: %s", str(e))
             print('error occured in scheduler')
             break

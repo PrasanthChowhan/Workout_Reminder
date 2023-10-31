@@ -15,6 +15,8 @@ class SettingGuiStandalone:
         self.root = tk.Tk()
         self.close_gui_var = tk.BooleanVar(value=False)
         self.close_gui_var.trace_add('write',self.check_for_quit)
+        gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
+        self.root.iconphoto(True,gui_icon)
         self.root.withdraw()
         SettingGui(parent=self.root, standalone=True)
         self.root.mainloop()

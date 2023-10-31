@@ -1,5 +1,5 @@
 import schedule
-import time,threading,logging
+import time,threading
 
 from src.Gui.Gui_Main import NotificationGui
 from src.DbManager import DbManager,ConfigReader
@@ -36,8 +36,7 @@ def is_thread_exists(thread_name):
         if thread.name == thread_name:            
             return True
 
-# Configure the logging settings
-logging.basicConfig(filename='error_log.txt', level=logging.ERROR, format='%(asctime)s - %(levelname)s - %(message)s')
+
 
 if __name__ == '__main__':
 
@@ -62,6 +61,6 @@ if __name__ == '__main__':
             
             schedule.run_pending()
         except Exception as e:
-            logging.error("An error occurred: %s", str(e))
+           
             print('error occured in scheduler')
             break

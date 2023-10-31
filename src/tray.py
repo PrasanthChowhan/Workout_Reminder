@@ -23,7 +23,7 @@ class WorkoutTray:
 
 
     def _title(self) -> str:
-        return "Workout Reminder\n" + "next exercise on: " + self.next_exercise_time
+        return "💪🏻Workout Reminder\n" + "next exercise on: " + self.next_exercise_time
 
     def _menu(self)-> Menu:
         return Menu(MenuItem("Settings", self._open_settings),
@@ -31,7 +31,7 @@ class WorkoutTray:
                     )
 
     def _image(self, ):    
-        return Image.open("resources\icons\gui icon\goblin.png")
+        return Image.open(r"resources\icons\gui icon\fire.png")
 
    
     def _open_settings(self, icon, item):
@@ -70,5 +70,5 @@ if __name__ == "__main__":
     tray = WorkoutTray(next_exercise_time='sunday')
     tray.start_tray()
     print('starting')
-    
+
     tray.next_exercise_time = 'monday'

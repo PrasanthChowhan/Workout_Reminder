@@ -2,35 +2,47 @@ from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, La
 import tkinter as tk
 from tkinter import ttk
 from src.DbManager import ConfigReader
-from src.utils.constants import DatabaseConstants,WebLinks
+from src.utils.constants import DatabaseConstants, WebLinks
 from src.GitCommands import GitCommands
+from src.Gui.window_function import SetWindowPosition
 import webbrowser
-
+import sys
+import subprocess
+import threading
+from src.SubprocessCommands import SubprocessCommands
+# from testing_python import open_tray
 
 class SettingGuiStandalone:
-    def __init__(self):
+    def __init__(self,stop_scheduling_callback=None):
         self.close_gui_var = None
-        
+        self.stop_scheduling_callback = stop_scheduling_callback
+
     def start_gui(self):
+        # print("Starting standalone")
         self.root = tk.Tk()
         self.close_gui_var = tk.BooleanVar(value=False)
-        self.close_gui_var.trace_add('write',self.check_for_quit)
+        self.close_gui_var.trace_add('write', self.check_for_quit)
         gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
-        self.root.iconphoto(True,gui_icon)
+        self.root.iconphoto(True, gui_icon)
         self.root.withdraw()
-        SettingGui(parent=self.root, standalone=True)
+        self.root.attributes("-topmost", True)
+        # print(f'stop scheduling callback in settinggui standalonge {self.stop_scheduling_callabck}')
+
+        toplevel = SettingGui(parent=self.root, standalone=True,stop_scheduling_callback=self.stop_scheduling_callback)
+        SetWindowPosition(window=toplevel)
         self.root.mainloop()
 
     def get_close_gui_var(self):
         return self.close_gui_var
-    
-    def check_for_quit(self,*args):
+
+    def check_for_quit(self, *args):
         if self.close_gui_var:
             self.root.destroy()
 
 
 class SettingGui(tk.Toplevel):
-    def __init__(self, parent=None, standalone=False):
+    def __init__(self, parent=None, standalone=False,stop_scheduling_callback = None):
+        self.stop_scheduling_callback = stop_scheduling_callback
 
         super().__init__(master=parent)
         if standalone is False:
@@ -53,41 +65,58 @@ class SettingGui(tk.Toplevel):
         # icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
         # self.iconphoto(True,icon)
 
-        self.setting_notebook = SettingNotebook(parent=self)
+        self.setting_notebook = SettingNotebook(parent=self,update_gui_callback= self.system_upadating_protocol)
         self.setting_notebook.pack(fill='both')
-        self.save_button = ttk.Button(master=self, text='Save', 
-                                 command=self.save_command)
+        self.save_button = ttk.Button(master=self, text='Save',
+                                      command=self.save_command)
         self.save_button.pack(fill='x')
 
     def save_command(self):
-        self.save_button.configure(text='Saving...',state='disabled')
+        self.save_button.configure(text='Saving...', state='disabled')
         self.setting_notebook.save_all_data()
-        self.after(200,lambda:self.save_button.configure(text='Save',state='normal'))
-
+        self.after(500, lambda: self.save_button.configure(
+            text='Save', state='normal'))
+        self.system_upadating_protocol()
+    
+    def system_upadating_protocol(self):
+        self.on_close()
+        self.stop_scheduling_callback()
+        # if self.stop_scheduling_callback:
+        #     self.stop_scheduling_callback()
+        # SettingGuiStandalone().start_gui()
+        # threading.Thread(target=SettingGuiStandalone().start_gui).start()
+        # print(threading.enumerate())
+        # threading.Thread(target=SubprocessCommands, args=('settings', ),name='SettingGui').start()
+        threading.Thread(target=SubprocessCommands, args=('schedule', )).start()
+        sys.exit()
     def on_close(self):
-        self.style.theme_use('default')
-        self.destroy()
-
         if self.standalone:
             self.parent.destroy()
+        else:
+            self.style.theme_use('default')
+            self.destroy()
 
 
 class SettingNotebook(ttk.Notebook):
     setting_dict = {}
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None, update_gui_callback=None):
         super().__init__(master=parent,
                          #  style='TNotebook'
                          )
 
         ## {} if file not found ##
-        setting_dict = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        setting_dict = ConfigReader(
+            DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
 
         self.tab = {}
         ## CREATE FRAME ##
-        self.tab['Exercise'] = MuscleSetting(parent=self, setting_dict=setting_dict)
-        self.tab['Save to'] = OnlineIntergration(parent=self,setting_dict=setting_dict)
-        self.tab['update'] = update_feedback(parent=self)
+        self.tab['Exercise'] = MuscleSetting(
+            parent=self, setting_dict=setting_dict)
+        self.tab['Save to'] = OnlineIntergration(
+            parent=self, setting_dict=setting_dict)
+        self.tab['update'] = update_feedback(
+            parent=self, update_gui_callback=update_gui_callback)
 
         test_frame = tk.Frame(master=self)
 
@@ -101,7 +130,8 @@ class SettingNotebook(ttk.Notebook):
         for instance in self.tab.values():
             all_dict_combined.update(instance.get_info())
 
-        ConfigReader().update_or_create_yaml_file(DatabaseConstants.SETTINGS_YAML_PATH, all_dict_combined)
+        ConfigReader().update_or_create_yaml_file(
+            DatabaseConstants.SETTINGS_YAML_PATH, all_dict_combined)
 
 
 class MuscleSetting(ttk.Frame):
@@ -117,7 +147,8 @@ class MuscleSetting(ttk.Frame):
                                      text='Interval (min)')
         interval_icon.pack(side='left', fill='x', padx=10, pady=10)
 
-        self.interval_entry = IntervalEntry(timer_frame,default=setting_dict.get('schedule',45))
+        self.interval_entry = IntervalEntry(
+            timer_frame, default=setting_dict.get('schedule', 45))
         self.interval_entry.pack(side='left', fill='x', padx=10, pady=10)
 
         # MESSAGE
@@ -126,7 +157,7 @@ class MuscleSetting(ttk.Frame):
         self.notify_label.pack()
 
         ## COMBOBOX FRAME ##
-        combi_setting :dict = setting_dict.get('database',{})
+        combi_setting: dict = setting_dict.get('database', {})
 
         self.combo_frame = tk.Frame(master=self)
         self.combo_frame.pack(expand=True, fill='x')
@@ -203,17 +234,18 @@ class MuscleSetting(ttk.Frame):
     def save_all_muscles_setting(self):
         equipment_entry_value = self.equipment_combi.get()
         # check if the user selected equipment or not
-        
+
         if self.check_interval_entry():
             if self.cycle_muscle_var.get():
-                self.muscle_combi.configure(state='disabled') # disable muscle combi if target all muscle is selected
+                # disable muscle combi if target all muscle is selected
+                self.muscle_combi.configure(state='disabled')
             else:
-                self.muscle_combi.configure(state='normal') # enable muscle combi
+                self.muscle_combi.configure(
+                    state='normal')  # enable muscle combi
             if self.equipment_combi.get() and self.difficulty_combi.get():
                 pass
             else:
                 self.notify_var.set('Select Equipment and Difficulty')
-            
 
 
 class OnlineIntergration(ttk.Notebook):
@@ -223,10 +255,11 @@ class OnlineIntergration(ttk.Notebook):
         self.name_in_dict = 'Integration setting'
         self.integrate_obj_dict = {}  # Frame Instances are stored ##
 
-        online_integration = setting_dict.get(self.name_in_dict,{})
+        online_integration = setting_dict.get(self.name_in_dict, {})
 
         ## Create frame ##
-        self.integrate_obj_dict['Notion'] = self.NotionTab(self, notion_setting=online_integration.get('Notion', {}))
+        self.integrate_obj_dict['Notion'] = self.NotionTab(
+            self, notion_setting=online_integration.get('Notion', {}))
         # self.integrate_obj_dict['Potion'] = self.NotionTab(self)
 
         ## Add frames to notebook ##
@@ -279,7 +312,8 @@ class OnlineIntergration(ttk.Notebook):
                                                     tk_var=self.vars['page_id'])
             self.widgets['page_id'].pack(fill='x', padx=5, pady=5)
 
-            self.widgets['database_id'] = LabelAndEntry(self, label_name='Database-id', tk_var=self.vars['database_id'],state= 'disabled')
+            self.widgets['database_id'] = LabelAndEntry(
+                self, label_name='Database-id', tk_var=self.vars['database_id'], state='disabled')
             self.widgets['database_id'].pack(fill='x', padx=5, pady=5)
 
             ## NOTIFY LABEL ##
@@ -297,39 +331,45 @@ class OnlineIntergration(ttk.Notebook):
                 dict[widget_name] = self.vars[widget_name].get()
             return dict
 
-class update_feedback(ttk.Frame):
-    def __init__(self,parent=None):
-        super().__init__(master=parent)
-        
 
-        ttk.Button(self,text='Check for updates',command= self.check_for_updates,cursor='hand2').pack(padx=5,pady=5)
+class update_feedback(ttk.Frame):
+    def __init__(self, parent=None, update_gui_callback=None):
+        super().__init__(master=parent)
+        self.update_gui_callback = update_gui_callback
+
+        ttk.Button(self, text='Check fardow updates',
+                   command=self.check_for_updates, cursor='hand2').pack(padx=5, pady=5)
 
         self.msg_var = tk.StringVar(value='')
-        self.label=ttk.Label(self,textvariable=self.msg_var,justify='center',anchor='center')
-        self.update_button=ttk.Button(self,textvariable=self.msg_var,command=GitCommands.update_app)
+        self.label = ttk.Label(self, textvariable=self.msg_var,
+                               justify='center', anchor='center')
+        self.update_button = ttk.Button(self, textvariable=self.msg_var,
+                                        command=self.update_gui_callback)
+        # self.update_button.pack(padx=5, pady=5)
 
+        ttk.Button(self, text='help us improve by providing your feedback',
+                   command=self.open_feedback, cursor='hand2').pack(side='bottom', pady=2)
 
-        ttk.Button(self,text='help us improve by providing your feedback',command=self.open_feedback,cursor='hand2').pack(side='bottom',pady=2)
-
-    def check_for_updates(self): ## IF UPDATE IS AVAILABLE BUTTON IS SHOWN FOR PULLING/UPDATIN ##
+   
+    # IF UPDATE IS AVAILABLE BUTTON IS SHOWN FOR PULLING/UPDATIN ##
+    def check_for_updates(self):
         status = GitCommands.check_for_update()
         self.msg_var.set(value=status)
 
         if status == 'Update available':
-            self.update_button.pack(padx=5,pady=5)
+            self.update_button.pack(padx=5, pady=5)
         else:
-            self.label.pack(padx=5,pady=5,fill= 'x')
+            self.label.pack(padx=5, pady=5, fill='x')
 
     def open_feedback(self):
         webbrowser.open(WebLinks.GOOGLE_FORMS)
-           
 
-    
-    def get_info(self): # mandatory 
+    def get_info(self):  # mandatory
         return {}
 
+
 if __name__ == '__main__':
-    SettingGuiStandalone()
+    SettingGuiStandalone().start_gui()
     # root = tk.Tk()
     # SettingGui(root)
     # root.mainloop()

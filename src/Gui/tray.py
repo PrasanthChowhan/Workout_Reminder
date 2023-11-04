@@ -1,17 +1,18 @@
-import pystray
+import pystray,sys
 import threading,time,tkinter as tk
 from pystray import Menu, MenuItem, Icon
 from PIL import Image
 from src.Gui.Exercise_setting_Gui import SettingGuiStandalone
-
+from src.SubprocessCommands import SubprocessCommands
 # setter concept is used to auto update tray 
 
 
 class WorkoutTray:
     
-    def __init__(self, next_exercise_time=None, ):
+    def __init__(self, next_exercise_time=None,stop_scheduling_callabck = None ):
         self._next_exercise_time = next_exercise_time
-        # add any var here and in _new_tray to update when the var is changed 
+        self.stop_scheduling_callabck = stop_scheduling_callabck
+
     @property
     def next_exercise_time(self):
         return self._next_exercise_time
@@ -35,8 +36,8 @@ class WorkoutTray:
 
    
     def _open_settings(self, icon, item):
-
-        self.setting_gui = SettingGuiStandalone()
+        self.setting_gui = SettingGuiStandalone(self.stop_scheduling_callabck)
+        # threading.Thread(target=SubprocessCommands, args=('settings', )).start()
         threading.Thread(target=self.setting_gui.start_gui,name='SettingGui',).start() #name of thread is important for scheulder
 
         while not self.setting_gui.get_close_gui_var(): # wait for tk.var is set
@@ -44,9 +45,8 @@ class WorkoutTray:
 
         self.close_var =self.setting_gui.get_close_gui_var()
         
-    def _exit(self, icon, item):
-        icon.stop()
-
+    def _exit(self, *args):
+        self.icon.stop()
     def close_setting_gui(self):
         self.close_var.set(True) # check _open_settings
     
@@ -71,4 +71,4 @@ if __name__ == "__main__":
     tray.start_tray()
     print('starting')
 
-    tray.next_exercise_time = 'monday'
+    tray.next_exercise_time = 'friday'

@@ -5,6 +5,7 @@ from src.Gui.Exercise_setting_Gui import SettingGui
 from src.Exerciselog import ExerciseLog
 from src.Gui.styles import configure_styles
 from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR
+from src.Gui.window_function import SetWindowPosition
 
 
 # import button_styling_and_functionality
@@ -20,7 +21,7 @@ class NotificationGui(tk.Tk):
     def __init__(self, exercise_dict: dict = default_information):
         super().__init__()
         self.resizable(False, False)
-        self.overrideredirect(True)
+        # self.overrideredirect(True)
         self.geometry("400x250")
         self.attributes('-topmost', True)
 
@@ -33,13 +34,15 @@ class NotificationGui(tk.Tk):
 
         ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##
         DisableInteractionWithOtherWindow(self)
-        SetWindowPosition.for_tk(window=self, position=(0, 0, 'c'))
+        SetWindowPosition(window=self, position=(0, 0, 'c'))
 
         Container(parent=self, padx=10, exercise_dict=exercise_dict).pack(
             expand=True, fill='both')
 
-        self.bind("<Button-3>", self.right_click)
+        # self.bind("<Button-3>", self.right_click) # disabling right click settings
 
+    ## DISABLE RIGHT CLICK SETTINGS ##
+    '''
     def right_click(self, event):
         # print("Right click", event.x_root, event.y_root)
         context_menu = tk.Menu(self, tearoff=0)
@@ -49,7 +52,8 @@ class NotificationGui(tk.Tk):
 
     def open_settings(self):
         setting_gui = SettingGui(parent=self)
-        SetWindowPosition.for_tk(setting_gui, (0, 0, 'c'))
+        SetWindowPosition(setting_gui, (0, 0, 'c'))
+    '''
 
 
 class Container(tk.Frame):
@@ -135,7 +139,7 @@ class ActionButtonsFrame(CustomFrame):
         if is_completed is False:  # Get REason for not doing ##
             root = self.winfo_toplevel()
             reason_gui = ReasonTextGui(parent=root, exercise_log=exercise_log)
-            SetWindowPosition.for_tk(reason_gui, (0, 0, 'c'))
+            SetWindowPosition(reason_gui, (0, 0, 'c'))
 
         elif is_completed is True:
             exercise_log.add_entry_to_database()
@@ -147,48 +151,6 @@ class ActionButtonsFrame(CustomFrame):
             root.destroy()
         except Exception as e:
             print(f"Error in my_job: {e}")
-
-# UTILITY FUNCTIONS AND CLASSES
-
-
-class SetWindowPosition:
-    @staticmethod
-    def for_tk(window, position=(15, 25, 'se')):
-        """
-        Set the geometry of a window based on a specified position and anchor.
-
-        Args:
-            window (Tk or Toplevel): The window for which to set the geometry.
-            position (tuple, optional): A tuple specifying the initial position and anchor.
-                Default is (15, 25, 'se').
-
-        Returns:
-            None
-        """
-        window.update_idletasks()  # Actualize geometry
-        anchor = position[-1]
-        x_anchor = "-" if "w" not in anchor else "+"
-        y_anchor = "-" if "n" not in anchor else "+"
-        screen_w = window.winfo_screenwidth() // 2
-        screen_h = window.winfo_screenheight() // 2
-
-        top_w = window.winfo_width() // 2
-        top_h = window.winfo_height() // 2
-
-        if all(["e" not in anchor, "w" not in anchor]):
-            xpos = screen_w - top_w
-        else:
-            xpos = position[0]
-
-        if all(["n" not in anchor, "s" not in anchor]):
-            ypos = screen_h - top_h
-        else:
-            ypos = position[1]
-
-        if 'c' in anchor:  # center of the screen
-            xpos = screen_w - top_w
-            ypos = screen_h - top_h
-        window.geometry(f"{x_anchor}{xpos}{y_anchor}{ypos}")
 
 
 if __name__ == '__main__':

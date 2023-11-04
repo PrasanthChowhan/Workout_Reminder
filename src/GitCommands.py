@@ -109,6 +109,7 @@ class GitCommands:
     def check_for_update(cls):
         local_version = cls.get_local_repository_version()
         latest_release = cls.get_latest_release(cls.repo_url)
+        print(f'local version {local_version} \n latest version {latest_release}')
         
         if latest_release is not None:
             if local_version == latest_release:

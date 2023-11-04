@@ -42,7 +42,7 @@ class Scheduler:
         while self.continue_scheduling_var:
             print('App is update', not self.continue_scheduling_var)
             try:
-                configuration = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+                configuration = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
                 schedule_after = int(configuration['schedule'])
                 self.tray.next_exercise_time = self._add_minutes_to_current_time(schedule_after)
                 # print(self._add_minutes_to_current_time(schedule_after))

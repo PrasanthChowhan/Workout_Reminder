@@ -1,0 +1,13 @@
+# Default file because to not break the code
+
+Integration setting:
+  Notion:
+    api: ''
+    database_id: ''
+    page_id: ''
+    save: false
+database:
+  difficulty: beginner
+  equipment: band
+  muscle: default
+schedule: '30'

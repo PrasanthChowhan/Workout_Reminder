@@ -18,7 +18,7 @@ class NotionIntergrate:
         self.pageurl = "https://api.notion.com/v1/pages"
         # self.NOTION_API_KEY = ""
         # self.PAGE_ID = ""
-        settings = ConfigReader(DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        settings = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
         self.notion_settings = settings.get('Integration setting', {}).get('Notion',{})
 
         self.NOTION_API_KEY = self.notion_settings.get('api','')

@@ -14,14 +14,10 @@ What this module does
 '''
 
 
-class ConfigReader:
-    def __init__(self, config_file_path=None):
-        self.config_file_path = config_file_path
+class ConfigReader:        
     
-   
-
-
-    def read_config_file(self) -> dict:
+    @staticmethod
+    def read_config_file(config_file_path, default_file=None) -> dict:
         """
         Read and parse the configuration file in YAML format.
 
@@ -31,24 +27,70 @@ class ConfigReader:
         Raises:
             FileNotFoundError: If the configuration file is not found.
             yaml.YAMLError: If there is an error parsing the YAML file.
-            ValueError: If the configuration data is invalid or empty.
 
-        Returns an empty dictionary if errors occur during the process.
+        Returns the default configuration or an empty dictionary if errors occur during the process.
         """
         try:
-            with open(self.config_file_path, 'r') as config_file:
+            with open(config_file_path, 'r') as config_file:
                 loaded_data = yaml.safe_load(config_file)
                 if loaded_data is not None and isinstance(loaded_data, dict):
                     return loaded_data
                 else:
                     raise ValueError("Invalid or empty configuration data in the YAML file.")
         except FileNotFoundError:
-            print(f"Config file not found: {self.config_file_path}")
+            print(f"Config file not found: {config_file_path}")
+            # Check and load the default file only if the config file doesn't exist or raises an error.
+            if default_file:
+                try:
+                    with open(default_file, 'r') as default_config_file:
+                        default_data = yaml.safe_load(default_config_file)
+                        if default_data is not None and isinstance(default_data, dict):
+                            return default_data
+                        else:
+                            raise ValueError("Invalid or empty default configuration data in the YAML file.")
+                except FileNotFoundError:
+                    print(f"Default config file not found: {default_file}")
+                except yaml.YAMLError as e:
+                    print(f"Error parsing default YAML file: {e}")
+                except Exception as e:
+                    print(f"An error occurred while reading the default config file: {e}")
         except yaml.YAMLError as e:
             print(f"Error parsing YAML file: {e}")
         except Exception as e:
             print(f"An error occurred: {e}")
-        return {}  # Return an empty dictionary in case of errors
+
+        # Return an empty dictionary if no valid data can be loaded.
+        return {}
+
+    # @staticmethod
+    # def read_config_file(self,config_file_path,default_file=None) -> dict:
+    #     """
+    #     Read and parse the configuration file in YAML format.
+
+    #     Returns:
+    #         dict: A dictionary containing the parsed configuration data.
+
+    #     Raises:
+    #         FileNotFoundError: If the configuration file is not found.
+    #         yaml.YAMLError: If there is an error parsing the YAML file.
+    #         ValueError: If the configuration data is invalid or empty.
+
+    #     Returns an empty dictionary if errors occur during the process.
+    #     """
+    #     try:
+    #         with open(self.config_file_path, 'r') as config_file:
+    #             loaded_data = yaml.safe_load(config_file)
+    #             if loaded_data is not None and isinstance(loaded_data, dict):
+    #                 return loaded_data
+    #             else:
+    #                 raise ValueError("Invalid or empty configuration data in the YAML file.")
+    #     except FileNotFoundError:
+    #         print(f"Config file not found: {self.config_file_path}")
+    #     except yaml.YAMLError as e:
+    #         print(f"Error parsing YAML file: {e}")
+    #     except Exception as e:
+    #         print(f"An error occurred: {e}")
+    #     return {}  # Return an empty dictionary in case of errors
 
     def write_config_file(self, data: dict):
         """
@@ -156,7 +198,7 @@ class DbManager:
 
 
         # get user preference from settings.yaml
-        user_preference_dict = ConfigReader(self.config_file_path).read_config_file()
+        user_preference_dict = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
         user_preference_dict = user_preference_dict['database']
 
         if user_preference_dict['muscle'] == 'default': 

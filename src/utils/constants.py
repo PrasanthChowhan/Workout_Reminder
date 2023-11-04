@@ -4,6 +4,7 @@ class DatabaseConstants:
 
     
     SETTINGS_YAML_PATH = r'data\user\settings.yaml'
+    DEFUALT_SETTINGS_YAML_PATH = r'data\program\defaul_settings.yaml'
 
     EXERCISE_DB_PATH = r'data\program\exercise_database.sqlite' # where exercise are stored
     EXERCISE_DB_TABLE_NAME = 'Exercise'

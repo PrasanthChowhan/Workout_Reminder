@@ -74,8 +74,7 @@ class SettingNotebook(ttk.Notebook):
                          )
 
         ## {} if file not found ##
-        setting_dict = ConfigReader(
-            DatabaseConstants.SETTINGS_YAML_PATH).read_config_file()
+        setting_dict = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
 
         self.tab = {}
         ## CREATE FRAME ##

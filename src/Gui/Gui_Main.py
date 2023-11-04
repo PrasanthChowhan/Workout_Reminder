@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from src.Gui.components import LaterButton, ExerciseIcon, ExerciseTitle, CustomFrame, DisableInteractionWithOtherWindow, ReasonTextGui
-from src.Gui.Exercise_setting_Gui import SettingGui
 from src.Exerciselog import ExerciseLog
 from src.Gui.styles import configure_styles
 from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR

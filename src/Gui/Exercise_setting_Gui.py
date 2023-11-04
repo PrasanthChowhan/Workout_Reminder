@@ -7,7 +7,6 @@ from src.GitCommands import GitCommands
 from src.Gui.window_function import SetWindowPosition
 import webbrowser
 import sys
-import subprocess
 import threading
 from src.SubprocessCommands import SubprocessCommands
 # from testing_python import open_tray
@@ -18,52 +17,33 @@ class SettingGuiStandalone:
         self.stop_scheduling_callback = stop_scheduling_callback
 
     def start_gui(self):
-        # print("Starting standalone")
         self.root = tk.Tk()
         self.close_gui_var = tk.BooleanVar(value=False)
-        self.close_gui_var.trace_add('write', self.check_for_quit)
+        self.close_gui_var.trace_add('write', self._check_for_quit)
         gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
         self.root.iconphoto(True, gui_icon)
-        self.root.withdraw()
         self.root.attributes("-topmost", True)
-        # print(f'stop scheduling callback in settinggui standalonge {self.stop_scheduling_callabck}')
+        
 
-        toplevel = SettingGui(parent=self.root, standalone=True,stop_scheduling_callback=self.stop_scheduling_callback)
-        SetWindowPosition(window=toplevel)
+        SettingFrame(parent=self.root,
+                     stop_scheduling_callback=self.stop_scheduling_callback).pack(expand=True,fill='both')
+        
+        SetWindowPosition(window=self.root)
         self.root.mainloop()
 
     def get_close_gui_var(self):
         return self.close_gui_var
 
-    def check_for_quit(self, *args):
+    def _check_for_quit(self, *args):
         if self.close_gui_var:
             self.root.destroy()
 
-
-class SettingGui(tk.Toplevel):
-    def __init__(self, parent=None, standalone=False,stop_scheduling_callback = None):
+## most of the 
+class SettingFrame(tk.Frame):
+    def __init__(self, parent=None,stop_scheduling_callback = None):
         self.stop_scheduling_callback = stop_scheduling_callback
 
         super().__init__(master=parent)
-        if standalone is False:
-            self.transient(parent)
-            self.grab_set()
-            self.attributes("-topmost", True)
-
-        self.title("Settings")
-        self.lift(aboveThis=parent)
-
-        self.style = ttk.Style()
-        self.style.theme_use('vista')
-
-        self.protocol("WM_DELETE_WINDOW", self.on_close)
-
-        ## INITIALISE ##
-        self.standalone = standalone
-        self.parent = parent
-
-        # icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
-        # self.iconphoto(True,icon)
 
         self.setting_notebook = SettingNotebook(parent=self,update_gui_callback= self.system_upadating_protocol)
         self.setting_notebook.pack(fill='both')
@@ -81,20 +61,9 @@ class SettingGui(tk.Toplevel):
     def system_upadating_protocol(self):
         self.on_close()
         self.stop_scheduling_callback()
-        # if self.stop_scheduling_callback:
-        #     self.stop_scheduling_callback()
-        # SettingGuiStandalone().start_gui()
-        # threading.Thread(target=SettingGuiStandalone().start_gui).start()
-        # print(threading.enumerate())
-        # threading.Thread(target=SubprocessCommands, args=('settings', ),name='SettingGui').start()
         threading.Thread(target=SubprocessCommands, args=('schedule', )).start()
         sys.exit()
-    def on_close(self):
-        if self.standalone:
-            self.parent.destroy()
-        else:
-            self.style.theme_use('default')
-            self.destroy()
+
 
 
 class SettingNotebook(ttk.Notebook):
@@ -102,7 +71,6 @@ class SettingNotebook(ttk.Notebook):
 
     def __init__(self, parent=None, update_gui_callback=None):
         super().__init__(master=parent,
-                         #  style='TNotebook'
                          )
 
         ## {} if file not found ##
@@ -118,7 +86,7 @@ class SettingNotebook(ttk.Notebook):
         self.tab['update'] = update_feedback(
             parent=self, update_gui_callback=update_gui_callback)
 
-        test_frame = tk.Frame(master=self)
+
 
         ## ADD FRAME TO NOTEBOOK ##
         for name, instance in self.tab.items():
@@ -371,5 +339,5 @@ class update_feedback(ttk.Frame):
 if __name__ == '__main__':
     SettingGuiStandalone().start_gui()
     # root = tk.Tk()
-    # SettingGui(root)
+    # SettingFrame(root)
     # root.mainloop()

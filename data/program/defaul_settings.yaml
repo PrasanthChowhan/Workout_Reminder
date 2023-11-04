@@ -10,4 +10,4 @@ database:
   difficulty: beginner
   equipment: band
   muscle: default
-schedule: '30'
+schedule: '5'

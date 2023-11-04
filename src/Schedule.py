@@ -40,15 +40,13 @@ class Scheduler:
         
         
         while self.continue_scheduling_var:
-            print('App is update', not self.continue_scheduling_var)
             try:
                 configuration = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
                 schedule_after = int(configuration['schedule'])
                 self.tray.next_exercise_time = self._add_minutes_to_current_time(schedule_after)
-                # print(self._add_minutes_to_current_time(schedule_after))
-                time.sleep(5) 
-                # self.stop_scheduling()
-                # time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
+                
+                # time.sleep(5) 
+                time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
 
 
                 if self._is_thread_exists('SettingGui'): 
@@ -57,9 +55,7 @@ class Scheduler:
                 
                 if self.continue_scheduling_var:                                   
                     schedule.run_pending()
-                else:
-                    pass
-                    # sys.exit()
+                
             except Exception as e:
             
                 print('error occured in scheduler', e)
@@ -69,7 +65,6 @@ class Scheduler:
     def stop_scheduling(self):
         self.tray._exit()
         self.continue_scheduling_var = False
-        print(self.continue_scheduling_var,'in function running')
         
 
 

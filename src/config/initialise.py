@@ -61,14 +61,14 @@ def get_user_font_directory(): # for current user doesn't need admin permission
         return Path.home() / ".fonts"
     return None
 
-
+def update_initialise():
+    install_requiremnts('requirements.txt')
+    create_directory_if_not_exists("data/user")
 
 if __name__ == "__main__":
     install_requiremnts('requirements.txt')
     create_directory_if_not_exists("data/user")
-    SettingGuiStandalone()
+    SettingGuiStandalone().start_gui()
     # install_fonts('resources/fonts')
     
 
-
-## INSTALL FONTS ##

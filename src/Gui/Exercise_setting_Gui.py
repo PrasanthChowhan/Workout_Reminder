@@ -61,6 +61,10 @@ class SettingFrame(tk.Frame):
     def system_upadating_protocol(self):
         self.on_close()
         self.stop_scheduling_callback()
+                
+        initialise_thread = threading.Thread(target=SubprocessCommands, args=('initialise', ))
+        initialise_thread.start()
+        initialise_thread.join()
         threading.Thread(target=SubprocessCommands, args=('schedule', )).start()
         sys.exit()
 
@@ -304,7 +308,7 @@ class update_feedback(ttk.Frame):
         super().__init__(master=parent)
         self.update_gui_callback = update_gui_callback
 
-        ttk.Button(self, text='Check fardow updates',
+        ttk.Button(self, text='Check for updates',
                    command=self.check_for_updates, cursor='hand2').pack(padx=5, pady=5)
 
         self.msg_var = tk.StringVar(value='')

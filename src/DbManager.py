@@ -21,14 +21,18 @@ class ConfigReader:
         """
         Read and parse the configuration file in YAML format.
 
+        Args:
+            config_file_path (str): The path to the configuration file.
+            default_file (str, optional): The path to a default configuration file (if provided).
+
         Returns:
-            dict: A dictionary containing the parsed configuration data.
+            dict: A dictionary containing the parsed configuration data. If the configuration file is not found
+            or cannot be parsed, the default configuration data is used (if provided). If no valid data can be loaded,
+            an empty dictionary is returned.
 
         Raises:
             FileNotFoundError: If the configuration file is not found.
             yaml.YAMLError: If there is an error parsing the YAML file.
-
-        Returns the default configuration or an empty dictionary if errors occur during the process.
         """
         try:
             with open(config_file_path, 'r') as config_file:
@@ -61,36 +65,6 @@ class ConfigReader:
 
         # Return an empty dictionary if no valid data can be loaded.
         return {}
-
-    # @staticmethod
-    # def read_config_file(self,config_file_path,default_file=None) -> dict:
-    #     """
-    #     Read and parse the configuration file in YAML format.
-
-    #     Returns:
-    #         dict: A dictionary containing the parsed configuration data.
-
-    #     Raises:
-    #         FileNotFoundError: If the configuration file is not found.
-    #         yaml.YAMLError: If there is an error parsing the YAML file.
-    #         ValueError: If the configuration data is invalid or empty.
-
-    #     Returns an empty dictionary if errors occur during the process.
-    #     """
-    #     try:
-    #         with open(self.config_file_path, 'r') as config_file:
-    #             loaded_data = yaml.safe_load(config_file)
-    #             if loaded_data is not None and isinstance(loaded_data, dict):
-    #                 return loaded_data
-    #             else:
-    #                 raise ValueError("Invalid or empty configuration data in the YAML file.")
-    #     except FileNotFoundError:
-    #         print(f"Config file not found: {self.config_file_path}")
-    #     except yaml.YAMLError as e:
-    #         print(f"Error parsing YAML file: {e}")
-    #     except Exception as e:
-    #         print(f"An error occurred: {e}")
-    #     return {}  # Return an empty dictionary in case of errors
 
     def write_config_file(self, data: dict):
         """
@@ -141,48 +115,6 @@ class ConfigReader:
         except Exception as e:
             print(f"Error updating or creating YAML file: {e}")
             return False  # Error occurred during update or creation
-
-    
-
-
-    # def update_or_create_yaml_file(file_path, key, new_value):
-    #     """
-    #     Update a value in a YAML file or create the file if it doesn't exist.
-
-    #     Args:
-    #         file_path (str): The path to the YAML file.
-    #         key (str): The key to update in the YAML data.
-    #         new_value: The new value to set for the specified key.
-
-    #     Returns:
-    #         bool: True if the update was successful, False if there was an error.
-    #     """
-    #     try:
-    #         # Check if the file exists, and if not, create it
-    #         if not os.path.exists(file_path):
-    #             with open(file_path, 'w') as new_file:
-    #                 new_file.write('')  # Create an empty file
-
-    #         # Read the existing YAML data
-    #         with open(file_path, 'r') as file:
-    #             data = yaml.safe_load(file) or {}
-
-    #         # Update the data
-    #         data[key] = new_value
-
-    #         # Write the updated data back to the file
-    #         with open(file_path, 'w') as file:
-    #             yaml.dump(data, file, default_flow_style=False)
-
-    #         return True  # Successful update
-
-    #     except Exception as e:
-    #         print(f"Error updating or creating YAML file: {e}")
-    #         return False  # Error occurred during update or creation
- 
-
-
-
 
 class DbManager:
     def __init__(self):

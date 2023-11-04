@@ -5,9 +5,11 @@ class SubprocessCommands:
         self.command = ''
         if filename == 'settings': # I don't really need to open settings again.
             self.command = ["python", "-c",
-           "from src.Gui.Exercise_setting_Gui import SettingGuiStandalone; SettingGuiStandalone().start_gui().run()"]
+           "from src.Gui.Exercise_setting_Gui import SettingGuiStandalone; SettingGuiStandalone().start_gui()"]
         elif filename == 'schedule':
-            self.command = ["python", "-c",'from src.Schedule import Scheduler; Scheduler().start_scheduling().run()']
+            self.command = ["python", "-c",'from src.Schedule import Scheduler; Scheduler().start_scheduling()']
+        elif filename == 'initialise':
+            self.command = ["python", "-c", 'from src.config.initialise import update_initialise; update_initialise()']
         
 
         self._run_subprocess()
@@ -15,8 +17,6 @@ class SubprocessCommands:
     def _run_subprocess(self):
         try:
             subprocess.run(self.command, shell=True)
-            print('runngig self.command')
-
 
         # print("Running tray from different file")
         except subprocess.CalledProcessError as e:

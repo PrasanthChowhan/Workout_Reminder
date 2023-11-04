@@ -3,7 +3,7 @@ import threading,time,tkinter as tk
 from pystray import Menu, MenuItem, Icon
 from PIL import Image
 from src.Gui.Exercise_setting_Gui import SettingGuiStandalone
-from src.SubprocessCommands import SubprocessCommands
+
 # setter concept is used to auto update tray 
 
 

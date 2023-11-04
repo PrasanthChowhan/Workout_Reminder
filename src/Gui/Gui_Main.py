@@ -20,7 +20,7 @@ class NotificationGui(tk.Tk):
     def __init__(self, exercise_dict: dict = default_information):
         super().__init__()
         self.resizable(False, False)
-        # self.overrideredirect(True)
+        self.overrideredirect(True)
         self.geometry("400x250")
         self.attributes('-topmost', True)
 

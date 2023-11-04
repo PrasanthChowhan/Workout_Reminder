@@ -1,5 +1,4 @@
 # Default file because to not break the code
-
 Integration setting:
   Notion:
     api: ''
@@ -8,6 +7,6 @@ Integration setting:
     save: false
 database:
   difficulty: beginner
-  equipment: band
+  equipment: bodyweight
   muscle: default
-schedule: '5'
+schedule: '1'

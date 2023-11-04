@@ -28,7 +28,7 @@ class WorkoutTray:
 
     def _menu(self)-> Menu:
         return Menu(MenuItem("Settings", self._open_settings),
-                    MenuItem("Exit", self._exit) # If you want to exit, then why use in the first place?
+                    # MenuItem("Exit", self._exit) # If you want to exit, then why use in the first place?
                     )
 
     def _image(self, ):    

@@ -5,6 +5,8 @@ from src.DbManager import DbManager,ConfigReader
 from src.utils.constants import DatabaseConstants
 from src.Gui.tray import WorkoutTray
 from datetime import datetime, timedelta
+import sys
+sys.argv[0] = "Workout Reminder.py"
 
 class Scheduler:
     def __init__(self):
@@ -45,8 +47,8 @@ class Scheduler:
                 schedule_after = int(configuration['schedule'])
                 self.tray.next_exercise_time = self._add_minutes_to_current_time(schedule_after)
                 
-                # time.sleep(5) 
-                time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
+                time.sleep(10) 
+                # time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
 
 
                 if self._is_thread_exists('SettingGui'): 
@@ -69,4 +71,5 @@ class Scheduler:
 
 
 if __name__ == '__main__':
+    print(' starting scheduler')
     Scheduler().start_scheduling()

@@ -1,2 +1,2 @@
 @echo off
-start /B pythonw src/Scheduler.py
+start /B pythonw src/Schedule.py

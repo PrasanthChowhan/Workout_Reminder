@@ -1,7 +1,15 @@
 import os,subprocess,shutil,platform
 from pathlib import Path
-from src.Gui.Exercise_setting_Gui import SettingGuiStandalone
 
+
+def pip_install_e():
+    command = "pip install -e ."
+    try:
+        # Run the pip command
+        subprocess.run(command, check=True)
+        print("Requirements installed successfully.")
+    except subprocess.CalledProcessError as e:
+        print(f"Error installing requirements: {e}")
 
 ## INSTALL REQUIREMENTS ##
 def install_requiremnts(file_path):
@@ -62,13 +70,17 @@ def get_user_font_directory(): # for current user doesn't need admin permission
     return None
 
 def update_initialise():
+    pip_install_e()
     install_requiremnts('requirements.txt')
     create_directory_if_not_exists("data/user")
 
 if __name__ == "__main__":
-    install_requiremnts('requirements.txt')
-    create_directory_if_not_exists("data/user")
-    SettingGuiStandalone().start_gui()
+    try:
+        install_requiremnts('requirements.txt')
+        create_directory_if_not_exists("data/user")
+        print("Initialising completed")
+    except:
+        print('Error occured while initializing')
     # install_fonts('resources/fonts')
     
 

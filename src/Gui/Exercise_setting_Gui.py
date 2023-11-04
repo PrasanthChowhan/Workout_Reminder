@@ -42,10 +42,11 @@ class SettingGuiStandalone:
 class SettingFrame(tk.Frame):
     def __init__(self, parent=None,stop_scheduling_callback = None):
         self.stop_scheduling_callback = stop_scheduling_callback
+        
 
         super().__init__(master=parent)
 
-        self.setting_notebook = SettingNotebook(parent=self,update_gui_callback= self.system_upadating_protocol)
+        self.setting_notebook = SettingNotebook(parent=self,update_gui_callback= lambda:self.system_upadating_protocol(initialise=True))
         self.setting_notebook.pack(fill='both')
         self.save_button = ttk.Button(master=self, text='Save',
                                       command=self.save_command)
@@ -56,15 +57,16 @@ class SettingFrame(tk.Frame):
         self.setting_notebook.save_all_data()
         self.after(500, lambda: self.save_button.configure(
             text='Save', state='normal'))
-        self.system_upadating_protocol()
+        self.system_upadating_protocol(initialise=False)
     
-    def system_upadating_protocol(self):
-        self.on_close()
-        self.stop_scheduling_callback()
-                
-        initialise_thread = threading.Thread(target=SubprocessCommands, args=('initialise', ))
-        initialise_thread.start()
-        initialise_thread.join()
+    def system_upadating_protocol(self,initialise = False):
+        self.winfo_toplevel().destroy() # destroying the root
+        if self.stop_scheduling_callback:
+            self.stop_scheduling_callback()
+        if initialise: # INitialise again only after update.      
+            initialise_thread = threading.Thread(target=SubprocessCommands, args=('initialise', ))
+            initialise_thread.start()
+            initialise_thread.join()
         threading.Thread(target=SubprocessCommands, args=('schedule', )).start()
         sys.exit()
 

@@ -32,7 +32,7 @@ class WorkoutTray:
                     )
 
     def _image(self, ):    
-        return Image.open(r"resources\icons\gui icon\fire.png")
+        return Image.open(r"resources\icons\gui icon\heartbeat.png")
 
    
     def _open_settings(self, icon, item):

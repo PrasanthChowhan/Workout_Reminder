@@ -102,7 +102,8 @@ class GitCommands:
         if repo_url == None:
             repo_url = cls.repo_url
         try:
-            subprocess.run(['git', 'pull', f'https://github.com/{repo_url}.git'], check=True)
+            subprocess.run(['git', 'pull',f'https://github.com/{repo_url}.git'], check=True)
+            subprocess.run(['git', 'fetch', '--tags',f'https://github.com/{repo_url}.git' ], check=True)
             print('Git pull completed successfully.')
         except subprocess.CalledProcessError as e:
             print(f'Error during Git pull: {e}')

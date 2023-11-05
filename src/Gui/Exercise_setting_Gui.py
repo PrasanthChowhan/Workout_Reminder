@@ -68,12 +68,12 @@ class SettingFrame(tk.Frame):
         if self.stop_scheduling_callback:
             self.stop_scheduling_callback()
         GitCommands.git_pull()
-        SubprocessCommands('initialise')
-        # if initialise: # INitialise again only after update.
+        if initialise: # INitialise again only after update.
+            SubprocessCommands.run_subprocess('initialise') 
         #     initialise_thread = threading.Thread(target=SubprocessCommands, args=('initialise', ))
         #     initialise_thread.start()
         #     initialise_thread.join()
-        threading.Thread(target=SubprocessCommands,
+        threading.Thread(target=SubprocessCommands.run_subprocess,
                          args=('schedule', )).start()
 
 

@@ -70,8 +70,8 @@ def get_user_font_directory(): # for current user doesn't need admin permission
     return None
 
 def update_initialise():
-    pip_install_e()
     install_requiremnts('requirements.txt')
+    pip_install_e()
     create_directory_if_not_exists("data/user")
 
 if __name__ == "__main__":

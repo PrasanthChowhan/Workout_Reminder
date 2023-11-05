@@ -68,15 +68,15 @@ class GitCommands:
             response = requests.get(f'https://api.github.com/repos/{repo_url}/releases/latest')
             if response.status_code == 200:
                 release_info = response.json()
-                # print('yo')
                 
-                return release_info['tag_name']
+                return {'tag_name': release_info['tag_name'],'release_notes': release_info['body']}
+                
         except Exception as e:
             print(f'Error getting release information: {e}')
         return None
 
     @classmethod
-    def git_pull(cls,repo_url):
+    def git_pull(cls,repo_url=None):
         """
         Pull the latest changes from a GitHub repository using Git.
 
@@ -99,6 +99,8 @@ class GitCommands:
             Ensure that you have Git installed and configured.
 
         """
+        if repo_url == None:
+            repo_url = cls.repo_url
         try:
             subprocess.run(['git', 'pull', f'https://github.com/{repo_url}.git'], check=True)
             print('Git pull completed successfully.')
@@ -109,34 +111,32 @@ class GitCommands:
     def check_for_update(cls):
         local_version = cls.get_local_repository_version()
         latest_release = cls.get_latest_release(cls.repo_url)
-        print(f'local version {local_version} \n latest version {latest_release}')
+        print(latest_release)
+        print(f'local version {local_version} \nlatest version {latest_release["tag_name"]}')
         
         if latest_release is not None:
-            if local_version == latest_release:
-                return "Up to date"
-            elif local_version < latest_release:
-                return "Update available"
+            if local_version == latest_release['tag_name']:
+                return {'text':"Up to date"}
+            elif local_version < latest_release['tag_name']:
+                return {'text':"Update now",'release_notes':latest_release['release_notes']}
             else: # Ignore this 
-                return "Local version is ahead"
+                return {'text':"Local version is ahead"}
         else:
-            return "No Release available"
+            return {'text':"No Release available"}
         
-    @classmethod
-    def update_app(cls):
-        cls.git_pull(cls.repo_url)
+    # @classmethod
+    # def update_app(cls):
+    #     cls.git_pull(cls.repo_url)
         
-        command = "pip install -e ."
-        # Run the command in the shell
-        try:
-            subprocess.run(command, shell=True, check=True)
-            print("Package installed successfully.")
-        except subprocess.CalledProcessError as e:
-            print(f"Error installing package: {e}")
+    #     command = "pip install -e ."
+    #     # Run the command in the shell
+    #     try:
+    #         subprocess.run(command, shell=True, check=True)
+    #         print("Package installed successfully.")
+    #     except subprocess.CalledProcessError as e:
+    #         print(f"Error installing package: {e}")
 
-# def update_app():
-#     current_version = GitCommands.get_local_repository_version()
-#     print(current_version)
 
 if __name__ == '__main__':
     # update_app()
-    GitCommands.check_for_update()
+    print(GitCommands.check_for_update())

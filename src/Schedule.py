@@ -71,5 +71,5 @@ class Scheduler:
 
 
 if __name__ == '__main__':
-    print(' starting scheduler')
+    print('starting scheduler')
     Scheduler().start_scheduling()

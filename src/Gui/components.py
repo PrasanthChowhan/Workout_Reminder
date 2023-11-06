@@ -145,7 +145,15 @@ class LaterButton(CanvasWithParentBackground):
     def root_destroy(self, event):
         self.after(10, self.callback_func)
 
- 
+class UpdateProgressBar(ttk.Labelframe):
+    def __init__(self,parent=None):
+        super().__init__(master=parent)
+
+        self.progress_bar = ttk.Progressbar(self,mode='indeterminate',maximum=100)
+        self.progress_bar.pack(fill='x',padx=2,pady=1)
+        self.configure(text='Updating do not exit')
+    def start(self,interval = 10):
+        self.progress_bar.start(interval)
 class ReasonTextGui(tk.Toplevel):
     '''
     When user clicks on later, he/she is prompted with the reason gui. where one has to type the reason for not doing the exercise.
@@ -457,5 +465,6 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.geometry('200x200')
     root.attributes("-topmost", True)
-    ReasonTextGui(root)
+    UpdateProgressBar(root).pack()
+    # ReasonTextGui(root)
     root.mainloop()

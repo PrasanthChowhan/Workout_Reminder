@@ -12,7 +12,7 @@ class SubprocessCommands:
         elif filename == 'initialise':
             command= ["python", "-c", 'from src.config.initialise import update_initialise; update_initialise()']
         try:
-            result = subprocess.run(self.command, shell=True)
+            result = subprocess.run(command, shell=True)
             if result.returncode == 0:
                 print(f'{command} subprocess executed successfully')
 

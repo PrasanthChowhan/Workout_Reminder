@@ -1,4 +1,4 @@
-from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry
+from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry,UpdateProgressBar
 import tkinter as tk
 from tkinter import ttk
 from src.DbManager import ConfigReader
@@ -40,8 +40,6 @@ class SettingGuiStandalone:
         if self.close_gui_var:
             self.root.destroy()
 
-# most of the
-
 
 class SettingFrame(tk.Frame):
     def __init__(self, parent=None, stop_scheduling_callback=None):
@@ -63,18 +61,16 @@ class SettingFrame(tk.Frame):
             text='Save', state='normal'))
         self.system_upadating_protocol(initialise=False)
 
-    def system_upadating_protocol(self, initialise=False):
-        self.winfo_toplevel().destroy()  # destroying the root
+    def system_upadating_protocol(self, initialise=False,): # order or execution is important
+        if initialise: # INitialise again only after update.
+            GitCommands.git_pull()
+            SubprocessCommands.run_subprocess('initialise') # next line is executed after subprocess is finished
+        
+        threading.Thread(target=SubprocessCommands.run_subprocess,args=('schedule', )).start()
         if self.stop_scheduling_callback:
             self.stop_scheduling_callback()
-        GitCommands.git_pull()
-        if initialise: # INitialise again only after update.
-            SubprocessCommands.run_subprocess('initialise') 
-        #     initialise_thread = threading.Thread(target=SubprocessCommands, args=('initialise', ))
-        #     initialise_thread.start()
-        #     initialise_thread.join()
-        threading.Thread(target=SubprocessCommands.run_subprocess,
-                         args=('schedule', )).start()
+        self.winfo_toplevel().destroy()  # destroying the root
+
 
 
 class SettingNotebook(ttk.Notebook):
@@ -321,16 +317,20 @@ class update_feedback(ttk.Frame):
         self.release_notes_msg = tk.StringVar(value='')
 
         self.update_section = tk.Frame(master=self)
+        self.update_section.rowconfigure(0,weight=1,uniform='a')
+        self.update_section.columnconfigure((0,1,2),weight=1,uniform='a')
         self.update_section.pack(fill='x', padx=2, pady=2)
-        ttk.Button(self.update_section, text='Check for updates',
-                   command=self.check_for_updates, cursor='hand2').pack(side='left', padx=5, pady=5)
 
+        ttk.Button(self.update_section, text='Check for updates',
+                   command=self.check_for_updates, cursor='hand2').grid(row=0,column=0,sticky='news')
         self.label = ttk.Label(self.update_section, textvariable=self.msg_var,
-                               justify='center', anchor='center')
+                               justify='center', anchor='center')        
         self.update_button = ttk.Button(self.update_section, textvariable=self.msg_var, cursor='hand2',
-                                        command=self.update_gui_callback)
+                                        command=self.update_availbale_function)
+        
         self.text_box = tk.Text(self, relief='flat',
                                 wrap=tk.WORD, width=35, height=12)
+        self.progress_bar = UpdateProgressBar(self)
 
         ttk.Button(self, text='help us improve by providing your feedback',
                    command=self.open_feedback, cursor='hand2').pack(side='bottom', pady=2)
@@ -342,14 +342,24 @@ class update_feedback(ttk.Frame):
         self.msg_var.set(value=status['text'])
 
         if status['text'] == 'Update now':
-            self.update_button.pack(padx=5, pady=5, side='right')
+            self.update_button.grid(row=0,column=2,sticky='news',padx=2)
+            # self.update_button.pack(padx=5, pady=5, side='right')
             self.text_box.pack()
 
             self.text_box.insert('end', status['release_notes'])
             self.text_box.config(state='disabled')
 
         else:
-            self.label.pack(padx=5, pady=5, fill='x', side='right')
+            self.label.grid(row=0,column=2,sticky='news',padx=2)
+            # self.label.pack(padx=5, pady=5, fill='x', side='right')
+    def update_availbale_function(self):
+        pulling_thread = threading.Thread(target=self.update_gui_callback)
+        pulling_thread.start()
+        self.text_box.forget()
+        self.progress_bar.pack(fill="x",expand=True, padx=20, pady=20)
+        self.progress_bar.start(10)
+
+
 
     def open_feedback(self):
         webbrowser.open(WebLinks.GOOGLE_FORMS)

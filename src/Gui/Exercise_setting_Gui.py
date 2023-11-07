@@ -174,6 +174,8 @@ class MuscleSetting(ttk.Frame):
         ## BUTTONS FRAME ##
         button_frame = tk.Frame(master=self)
         button_frame.pack(fill='x', padx=5, pady=2)
+    def _startup_func(self):
+        startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python
 
     def _startup_func(self):
         startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python

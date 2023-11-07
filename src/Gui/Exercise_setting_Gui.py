@@ -6,9 +6,9 @@ from src.utils.constants import DatabaseConstants, WebLinks
 from src.GitCommands import GitCommands
 from src.Gui.window_function import SetWindowPosition
 import webbrowser
-import sys
 import threading
 from src.SubprocessCommands import SubprocessCommands
+from src.utils.startup_manager import StartupFileManager
 # from testing_python import open_tray
 
 
@@ -156,18 +156,30 @@ class MuscleSetting(ttk.Frame):
         self.muscle_combi.pack(fill='x', padx=5, pady=5)
 
         ## This code will set self.cycle_muscle_var to True if the value of setting_dict['muscle'] is 'default', and it will set it to False for any other value. ##
+        check_btn_frame = tk.Frame(master=self)
+        check_btn_frame.pack(fill='x')
         self.cycle_muscle_var = tk.BooleanVar(
             value=combi_setting.get('muscle', '') == 'default')
-        self.cycle_muscle = ttk.Checkbutton(master=self.combo_frame,
+        self.cycle_muscle = ttk.Checkbutton(master=check_btn_frame,
                                             text='Target all Muscles',
                                             command=self.save_all_muscles_setting,
                                             onvalue=True, offvalue=False, variable=self.cycle_muscle_var)
-        self.cycle_muscle.pack(padx=5, pady=5)
+        self.cycle_muscle.pack(padx=5, pady=5,side='left',fill='both',expand=True)
+
+        self.run_at_startup_var = tk.BooleanVar(value=False)
+        self.run_at_startup_var_check_btn = ttk.Checkbutton(master=check_btn_frame,onvalue=True,offvalue=False,command=self._startup_func,text='Run at startup',variable=self.run_at_startup_var)
+        self.run_at_startup_var_check_btn.pack(padx=5, pady=5,side='left',fill='x',expand=True)
 
         ## BUTTONS FRAME ##
         button_frame = tk.Frame(master=self)
         button_frame.pack(fill='x', padx=5, pady=2)
+    def _startup_func(self):
+        startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python
 
+        if self.run_at_startup_var.get():
+            startup_manager.add_to_startup()
+        else:
+            startup_manager.remove_from_startup()
     def check_interval_entry(self):
         entry_text = self.interval_entry.get()
         if not entry_text:
@@ -194,8 +206,7 @@ class MuscleSetting(ttk.Frame):
         for_data_base = {'database': setting_data,
                          'schedule': self.interval_entry.get()}
 
-        # ConfigReader().update_or_create_yaml_file(
-        #     DatabaseConstants.SETTINGS_YAML_PATH, for_data_base)
+        
         return for_data_base
 
     def save_user_settings(self):

@@ -55,11 +55,11 @@ class ExerciseLog:
     def add_entry_to_database(self):
 
         threading.Thread(target=SqliteDefs.insert_data_into_table, 
-                         args=(DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry)).start()
+                         args=(DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry,)).start()
         threading.Thread(target=NotionIntergrate().add_row_to_database,
-                         args=(self.log_entry)).start()
+                         args=(self.log_entry,)).start()
         threading.Thread(target=CreateCSV, 
-                         args=(DatabaseConstants.CSV_PATH, self.log_entry)).start()
+                         args=(DatabaseConstants.CSV_PATH, self.log_entry,)).start()
 
     def get_log_entry(self):
         return self.log_entry

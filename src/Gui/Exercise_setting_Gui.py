@@ -295,6 +295,9 @@ class OnlineIntergration(ttk.Notebook):
             self.notify_label = ttk.Label(self, text='', anchor=tk.CENTER)
             self.notify_label.pack(fill='x', padx=5, pady=5)
 
+            self.link_button = ttk.Button(self,text='watch how',command= lambda:webbrowser.open('https://youtu.be/s7mJYc40D4U'),cursor='hand2')
+            self.link_button.pack()
+
         def show(self):
             if self.widgets['api'].is_entry_empty() or self.widgets['page_id'].is_entry_empty():
                 self.notify_label.configure(text='Fields cannot be empty')

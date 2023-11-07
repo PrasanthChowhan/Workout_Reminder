@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 # Application details
 app_name = "Workout Reminder"
-app_version = "0.1.0"
+app_version = "0.1.1"
 app_author = "Prasanth Chowhan"
 app_email = "your.email@example.com"  # Replace with your email
 app_description = "A reminder app for exercise breaks."

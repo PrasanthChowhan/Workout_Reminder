@@ -5,7 +5,8 @@ from src.Exerciselog import ExerciseLog
 from src.Gui.styles import configure_styles
 from src.Gui.gui_settings import BACKGROUND_COLOR, SEPARATOR_COLOR
 from src.Gui.window_function import SetWindowPosition
-
+import threading
+from src.SubprocessCommands import SubprocessCommands
 
 # import button_styling_and_functionality
 default_information = {'name': 'Default_Push-up',
@@ -17,7 +18,7 @@ default_information = {'name': 'Default_Push-up',
 
 
 class NotificationGui(tk.Tk):
-    def __init__(self, exercise_dict: dict = default_information):
+    def __init__(self, exercise_dict: dict = default_information,stop_scheduling_callabck=None):
         super().__init__()
         self.resizable(False, False)
         self.overrideredirect(True)
@@ -28,6 +29,8 @@ class NotificationGui(tk.Tk):
         gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
         self.iconphoto(True,gui_icon)
        
+       # INitialise
+        self.stop_scheduling_callabck=stop_scheduling_callabck
         
         configure_styles()
 
@@ -38,21 +41,24 @@ class NotificationGui(tk.Tk):
         Container(parent=self, padx=10, exercise_dict=exercise_dict).pack(
             expand=True, fill='both')
 
-        # self.bind("<Button-3>", self.right_click) # disabling right click settings
+        self.bind("<Button-3>", self.right_click) # disabling right click settings
 
     ## DISABLE RIGHT CLICK SETTINGS ##
-    '''
+  
     def right_click(self, event):
         # print("Right click", event.x_root, event.y_root)
         context_menu = tk.Menu(self, tearoff=0)
-        context_menu.add_command(label="settings",
-                                 command=self.open_settings)
+        context_menu.add_command(label="reload",command=self._reload_app)
+        context_menu.add_command(label="exit",command=self._exit_app)
         context_menu.post(event.x_root, event.y_root)
 
-    def open_settings(self):
-        setting_gui = SettingGui(parent=self)
-        SetWindowPosition(setting_gui, (0, 0, 'c'))
-    '''
+    def _exit_app(self):
+        if self.stop_scheduling_callabck:
+            self.stop_scheduling_callabck()
+        self.destroy()
+    def _reload_app(self):
+        threading.Thread(target=SubprocessCommands.run_subprocess,args=('schedule', )).start()
+        self._exit_app()
 
 
 class Container(tk.Frame):

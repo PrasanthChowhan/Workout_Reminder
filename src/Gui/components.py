@@ -347,7 +347,7 @@ class ExerciseComboBox(ttk.Combobox):
 
         self['textvariable'] = self.selection
 
-        if self.this_instance_index == 0:
+        if self.this_instance_index%3 == 0:
             list = SqliteDefs.get_distinct_column_values(ExerciseComboBox.table_name,
                                                          column_name,
                                                          DatabaseConstants.EXERCISE_DB_PATH)

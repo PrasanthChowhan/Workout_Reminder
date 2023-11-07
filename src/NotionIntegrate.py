@@ -6,7 +6,7 @@ from src.DbManager import ConfigReader
 
 def check_requirements(func):
     def wrapper(self, *args, **kwargs):
-        if self.save:
+        if self.save is True and self.NOTION_API_KEY != "" and self.PAGE_ID != "":
             return func(self, *args, **kwargs)
         else:
             print(f"Requirements not met. function '{func.__name__}' not executed.")
@@ -16,6 +16,7 @@ class NotionIntergrate:
     def __init__(self):
         self.DBURL = "https://api.notion.com/v1/databases/"
         self.pageurl = "https://api.notion.com/v1/pages"
+        
         # self.NOTION_API_KEY = ""
         # self.PAGE_ID = ""
         settings = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
@@ -111,7 +112,7 @@ class NotionIntergrate:
             }
         }
         response_data = self.send_request(self.DBURL, data)
-        database_id = response_data['id']
+        database_id = response_data.get('id','error creating db')
         return database_id
     
     @check_requirements
@@ -191,7 +192,7 @@ class NotionIntergrate:
             print(f"Request failed with status code {response.status_code}")
             print(f"Error message: {error_message}")
 
-# b7fcbd11-a397-47ab-aa99-d3caf02a3dca
+
     ## SUPPORTING FUNCTIONS ##
     def _create_option_from_db(self, table_name: str, column_name: str):
 

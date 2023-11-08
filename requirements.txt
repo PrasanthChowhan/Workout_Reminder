@@ -3,3 +3,4 @@ pyyaml
 requests
 schedule
 pystray
+pywin32

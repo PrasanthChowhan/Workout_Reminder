@@ -1,7 +1,21 @@
 import os
 import getpass
-import shutil
+import win32com.client
+'''
+create a shortcut of bat file that runs the main program and place that shortcut in the startup folder
+'''
+def create_shortcut(target_path, shortcut_path, working_directory=None, description=None):
+    shell = win32com.client.Dispatch("WScript.Shell")
+    shortcut = shell.CreateShortCut(shortcut_path)
+    shortcut.TargetPath = os.path.join(os.getcwd(),target_path)
 
+    if working_directory: # start in property which is present in shortcut
+        shortcut.WorkingDirectory = working_directory
+
+    if description:
+        shortcut.Description = description
+
+    shortcut.Save()
 class StartupFileManager:
     def __init__(self, filename):
         """
@@ -11,6 +25,7 @@ class StartupFileManager:
             filename (str): The name of the file to manage in the startup folder.
         """
         self.filename = filename
+        self.shortcut = filename + '.lnk'
 
     def get_startup_folder_path(self):
         """
@@ -25,7 +40,7 @@ class StartupFileManager:
         # Determine the path to the user's startup folder
         startup_folder = os.path.join(os.environ['USERPROFILE'], 'AppData', 'Roaming', 'Microsoft', 'Windows', 'Start Menu', 'Programs', 'Startup')
 
-        return os.path.join(startup_folder, self.filename)
+        return os.path.join(startup_folder, self.shortcut)
 
     def add_to_startup(self):
         """
@@ -37,8 +52,7 @@ class StartupFileManager:
             print(f"The file '{self.filename}' already exists in the startup folder.")
         else:
             try:
-                # Copy the file to the startup folder
-                shutil.copy(self.filename, file_path)
+                create_shortcut(self.filename, file_path,working_directory=os.getcwd())
                 print(f"Successfully copied '{self.filename}' to the startup folder.")
             except Exception as e:
                 print(f"An error occurred: {e}")

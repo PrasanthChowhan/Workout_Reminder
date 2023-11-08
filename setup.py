@@ -15,6 +15,7 @@ install_requires = [
     "requests",
     "schedule",
     "pystray",
+    "pywin32",
 ]
 
 setup(

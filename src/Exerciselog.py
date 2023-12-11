@@ -2,7 +2,7 @@ from datetime import datetime
 from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import *
 from src.NotionIntegrate import NotionIntergrate
-from src.utils.Create_csv import CreateCSV
+import src.utils.CsvManager as CsvManager
 
 import time,threading
 
@@ -30,10 +30,10 @@ class ExerciseLog:
     def __init__(self):
         current_datetime = datetime.now()
         self.log_entry = {
-            'name': None,
-            'muscle': None,
-            'difficulty': None,
-            'equipment': None,
+            'name': 'None',
+            'muscle': '',
+            'difficulty': '',
+            'theme': '',
             'completed': False,
             'reason': '',
             'url': '',
@@ -55,10 +55,10 @@ class ExerciseLog:
     def add_entry_to_database(self):
 
         threading.Thread(target=SqliteDefs.insert_data_into_table, 
-                         args=(DatabaseConstants.EXERCISE_LOG_PATH, 'Track', self.log_entry,)).start()
-        threading.Thread(target=NotionIntergrate().add_row_to_database,
+                         args=(DatabaseConstants.EXERCISE_LOG_PATH, DatabaseConstants.EXERCISE_LOG_TABLE_NAME, self.log_entry,)).start()
+        threading.Thread(target=NotionIntergrate().themed_add_row_to_database,
                          args=(self.log_entry,)).start()
-        threading.Thread(target=CreateCSV, 
+        threading.Thread(target=CsvManager.CreateCSV, 
                          args=(DatabaseConstants.CSV_PATH, self.log_entry,)).start()
 
     def get_log_entry(self):

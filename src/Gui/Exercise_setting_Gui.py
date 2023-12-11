@@ -1,4 +1,4 @@
-from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry,UpdateProgressBar
+from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry,UpdateProgressBar,ThemeCombobox
 import tkinter as tk
 from tkinter import ttk
 from src.DbManager import ConfigReader
@@ -49,7 +49,7 @@ class SettingFrame(tk.Frame):
 
         self.setting_notebook = SettingNotebook(
             parent=self, update_gui_callback=lambda: self.system_upadating_protocol(initialise=True))
-        self.setting_notebook.pack(fill='both')
+        self.setting_notebook.pack(fill='both',expand=True)
         self.save_button = ttk.Button(master=self, text='Save',
                                       command=self.save_command)
         self.save_button.pack(fill='x')
@@ -109,13 +109,17 @@ class SettingNotebook(ttk.Notebook):
 
 class MuscleSetting(ttk.Frame):
     def __init__(self, parent=None, setting_dict: dict = {}):
-        super().__init__(master=parent, style='TFrame')
+        super().__init__(master=parent)
+
+        self.rowconfigure((0,1,2,3,4,5),weight=1,uniform='a')
+        self.columnconfigure((0,1),uniform='a',weight=1)
 
         self.notify_var = tk.StringVar(value='')
 
         ## Timer settings ##
         timer_frame = tk.Frame(master=self)
-        timer_frame.pack(fill='x', expand=True)
+    
+        timer_frame.grid(row=0,column=0,sticky='news',columnspan=2)
         interval_icon = IntervalIcon(parent=timer_frame, img_path=r'resources\icons\setting_gui\clock.png',
                                      text='Interval (min)')
         interval_icon.pack(side='left', fill='x',
@@ -128,14 +132,16 @@ class MuscleSetting(ttk.Frame):
 
         # MESSAGE
         self.notify_label = ttk.Label(master=self,
-                                      textvariable=self.notify_var)
-        self.notify_label.pack()
+                                      textvariable=self.notify_var,anchor='center')
+  
+        self.notify_label.grid(row=1,column=0,sticky='news',columnspan=2)
+    
 
         ## COMBOBOX FRAME ##
         combi_setting: dict = setting_dict.get('database', {})
 
         self.combo_frame = tk.Frame(master=self)
-        self.combo_frame.pack(expand=True, fill='x')
+        self.combo_frame.grid(row=3,column=0,sticky='news',rowspan=2,columnspan=2)
 
         self.equipment_combi = ExerciseComboBox(parent=self.combo_frame,
                                                 column_name='equipment',
@@ -157,26 +163,35 @@ class MuscleSetting(ttk.Frame):
 
         ## This code will set self.cycle_muscle_var to True if the value of setting_dict['muscle'] is 'default', and it will set it to False for any other value. ##
         check_btn_frame = tk.Frame(master=self)
-        check_btn_frame.pack(fill='x')
+        # check_btn_frame.pack(fill='x')
+        check_btn_frame.grid(row=5,column=0,sticky='news',padx=2,pady=2,columnspan=2)
 
         self.cycle_muscle_var = tk.BooleanVar(
             value=combi_setting.get('muscle', '') == 'default')
-        self.cycle_muscle = ttk.Checkbutton(master=check_btn_frame,
+        self.cycle_muscle = ttk.Checkbutton(master=self,
                                             text='Target all Muscles',
                                             command=self.save_all_muscles_setting,
                                             onvalue=True, offvalue=False, variable=self.cycle_muscle_var)
-        self.cycle_muscle.pack(padx=5, pady=5,side='left',fill='both',expand=True)
+        self.cycle_muscle.grid(row=5,column=1)
+        # self.cycle_muscle.pack(padx=5, pady=5,side='left',fill='both',expand=True)
 
         self.run_at_startup_var = tk.BooleanVar(value=setting_dict.get('run_at_start',False))
-        self.run_at_startup_var_check_btn = ttk.Checkbutton(master=check_btn_frame,onvalue=True,offvalue=False,command=self._startup_func,text='Run at startup',variable=self.run_at_startup_var)
-        self.run_at_startup_var_check_btn.pack(padx=5, pady=5,side='left',fill='x',expand=True)
+        self.run_at_startup_var_check_btn = ttk.Checkbutton(master=self,onvalue=True,offvalue=False,command=self._startup_func,text='Run at startup',variable=self.run_at_startup_var)
+        # self.run_at_startup_var_check_btn.pack(padx=5, pady=5,side='left',fill='x',expand=True)
+        self.run_at_startup_var_check_btn.grid(row=5,column=0)
 
-        ## BUTTONS FRAME ##
-        button_frame = tk.Frame(master=self)
-        button_frame.pack(fill='x', padx=5, pady=2)
-    def _startup_func(self):
-        startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python
+        ## Theme Frame ##
+        self.theme_frame = tk.Frame(master=self)
+        self.theme_frame.grid(row=2,column=0,sticky='news',rowspan=1,columnspan=2)
+        self.theme_combi = ThemeCombobox(parent=self.theme_frame,
+                      label_frame_text="Theme",
+                      default = setting_dict.get('theme',''),
+                      widgets=[self.cycle_muscle,self.combo_frame])
+        self.theme_combi.pack(fill='x', padx=5, pady=5)
+        
+        
 
+    
     def _startup_func(self):
         startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python
         if self.run_at_startup_var.get():
@@ -203,11 +218,14 @@ class MuscleSetting(ttk.Frame):
         else:
             muscle = self.muscle_combi.get()
 
-        setting_data = {'equipment': self.equipment_combi.get(),
+        setting_data = {
+                        'equipment': self.equipment_combi.get(),
                         'muscle': muscle,
-                        'difficulty': self.difficulty_combi.get()}
+                        'difficulty': self.difficulty_combi.get()
+                        }
 
-        for_data_base = {'database': setting_data,
+        for_data_base = {'theme':self.theme_combi.get(),
+                        'database': setting_data,
                          'schedule': self.interval_entry.get(),
                          'run_at_start': self.run_at_startup_var.get()}
 

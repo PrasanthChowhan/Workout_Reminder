@@ -18,20 +18,22 @@ default_information = {'name': 'Default_Push-up',
 
 
 class NotificationGui(tk.Tk):
-    def __init__(self, exercise_dict: dict = default_information,stop_scheduling_callabck=None):
+    def __init__(self, exercise_dict: dict = default_information, stop_scheduling_callabck=None):
+        # print('Notification Guionic')
         super().__init__()
         self.resizable(False, False)
-        self.overrideredirect(True)
-        self.geometry("400x250")
+        # self.overrideredirect(True)
+        # self.geometry("400x250")
+        self.geometry("400x100")
         self.attributes('-topmost', True)
 
-        
-        gui_icon = tk.PhotoImage(file='resources\icons\gui icon\pawn with dumbell.png')
-        self.iconphoto(True,gui_icon)
-       
+        gui_icon = tk.PhotoImage(
+            file='resources\icons\gui icon\pawn with dumbell.png')
+        self.iconphoto(True, gui_icon)
+
        # INitialise
-        self.stop_scheduling_callabck=stop_scheduling_callabck
-        
+        self.stop_scheduling_callabck = stop_scheduling_callabck
+
         configure_styles()
 
         ## DISABLE USER INTERACTION WITH OTHER WINDOWS ##
@@ -41,23 +43,26 @@ class NotificationGui(tk.Tk):
         Container(parent=self, padx=10, exercise_dict=exercise_dict).pack(
             expand=True, fill='both')
 
-        self.bind("<Button-3>", self.right_click) # disabling right click settings
+        # disabling right click settings
+        self.bind("<Button-3>", self.right_click)
 
     ## DISABLE RIGHT CLICK SETTINGS ##
-  
+
     def right_click(self, event):
         # print("Right click", event.x_root, event.y_root)
         context_menu = tk.Menu(self, tearoff=0)
-        context_menu.add_command(label="reload",command=self._reload_app)
-        context_menu.add_command(label="exit",command=self._exit_app)
+        context_menu.add_command(label="reload", command=self._reload_app)
+        context_menu.add_command(label="exit", command=self._exit_app)
         context_menu.post(event.x_root, event.y_root)
 
     def _exit_app(self):
         if self.stop_scheduling_callabck:
             self.stop_scheduling_callabck()
         self.destroy()
+
     def _reload_app(self):
-        threading.Thread(target=SubprocessCommands.run_subprocess,args=('schedule', )).start()
+        threading.Thread(target=SubprocessCommands.run_subprocess,
+                         args=('schedule', )).start()
         self._exit_app()
 
 
@@ -72,15 +77,15 @@ class Container(tk.Frame):
                               url=exercise_dict['url'],
                               ).pack(fill='x', pady=(15, 2))
 
-        separator = tk.Frame(self, borderwidth=10, relief='groove',
-                             background=SEPARATOR_COLOR).pack(fill='x')
+        # separator = tk.Frame(self, borderwidth=10, relief='groove',
+        #                      background=SEPARATOR_COLOR).pack(fill='x')
 
-        VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
-            fill='both', expand=True)
+        # VisualFrame(parent=self, exercise_dict=exercise_dict).pack(
+        #     fill='both', expand=True)
 
         # Action Frame
         ActionButtonsFrame(parent=self, exercise_dict=exercise_dict).pack(
-            # side='bottom',
+            side='bottom',
             fill='x', pady=5)
 
 

@@ -506,6 +506,34 @@ class SqliteDefs:
                 # Close the database connection if it was created here
                 connection.close()
 
+    @staticmethod
+    def get_table_names(database_or_cursor):
+        if isinstance(database_or_cursor, str):
+                # If a database path is provided, create a new connection and cursor
+                connection = sqlite3.connect(database_or_cursor)
+                cursor = connection.cursor()
+        elif isinstance(database_or_cursor, sqlite3.Cursor):
+            # If a cursor is provided, use it directly
+            cursor = database_or_cursor
+        else:
+            raise ValueError("Invalid database_or_cursor argument")
+
+        try:
+            # Create the table if it doesn't exist
+            cursor.execute("SELECT name FROM sqlite_master WHERE type='table';")
+            tables = cursor.fetchall()
+
+            table_names = [table[0] for table in tables]
+
+            return table_names
+
+        except sqlite3.Error as e:
+            print(f"Error inserting data: {e}")
+            return False  # Error occurred
+        finally:
+            if isinstance(database_or_cursor, str):
+                # Close the database connection if it was created here
+                connection.close()
 if __name__ == '__main__':
 
     # Connect to your SQLite database (replace 'your_database.db' with your database filename)
@@ -523,3 +551,6 @@ if __name__ == '__main__':
     # Commit the changes and close the connection
     conn.commit()
     conn.close()
+
+if __name__ == '__main__':
+    print(SqliteDefs.get_table_names('testing.sqlite'))

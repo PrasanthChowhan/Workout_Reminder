@@ -145,15 +145,20 @@ class LaterButton(CanvasWithParentBackground):
     def root_destroy(self, event):
         self.after(10, self.callback_func)
 
+
 class UpdateProgressBar(ttk.Labelframe):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super().__init__(master=parent)
 
-        self.progress_bar = ttk.Progressbar(self,mode='indeterminate',maximum=100)
-        self.progress_bar.pack(fill='x',padx=2,pady=1)
+        self.progress_bar = ttk.Progressbar(
+            self, mode='indeterminate', maximum=100)
+        self.progress_bar.pack(fill='x', padx=2, pady=1)
         self.configure(text='Updating do not exit')
-    def start(self,interval = 10):
+
+    def start(self, interval=10):
         self.progress_bar.start(interval)
+
+
 class ReasonTextGui(tk.Toplevel):
     '''
     When user clicks on later, he/she is prompted with the reason gui. where one has to type the reason for not doing the exercise.
@@ -321,6 +326,38 @@ class DisableInteractionWithOtherWindow(tk.Toplevel):
         root.destroy()
 
 
+class ThemeCombobox(ttk.Combobox):
+    def __init__(self, parent=None, label_frame_text=None,default = None, widgets=None):
+        self.widgets = widgets
+
+        label_frame = ttk.Labelframe(master=parent, text=label_frame_text)
+        label_frame.pack()
+        validate = parent.register(self.__validate_function)
+        super().__init__(master=label_frame, state='readonly', font=ICON_FONT,validate='focusin',validatecommand=(validate,'%P')) # since it read only we can't modify entry directly so not using index
+
+        table_from_theme = SqliteDefs.get_table_names(DatabaseConstants.THEMED_DB_PATH)
+        print(table_from_theme) 
+        exercise_db_equipments :list =  SqliteDefs.get_distinct_column_values('Exercise',
+                                                                              'equipment',
+                                                         DatabaseConstants.EXERCISE_DB_PATH)
+        values = ['none'] + table_from_theme 
+        self.selection = tk.StringVar(value=default)
+        self.__validate_function(default) # if theme none is selected then its not removing during initialization so calling this
+        self.configure(values= values,textvariable=self.selection)
+    
+    def __validate_function(self,value):
+        if self.widgets:
+            for widget in self.widgets: 
+                if value == 'none':
+                    widget.grid() 
+                else: 
+                    widget.grid_remove()
+                
+
+            
+        return True
+
+
 class ExerciseComboBox(ttk.Combobox):
     user_conditions = []
     combo_boxes_instances = []
@@ -347,7 +384,7 @@ class ExerciseComboBox(ttk.Combobox):
 
         self['textvariable'] = self.selection
 
-        if self.this_instance_index%3 == 0:
+        if self.this_instance_index % 3 == 0:
             list = SqliteDefs.get_distinct_column_values(ExerciseComboBox.table_name,
                                                          column_name,
                                                          DatabaseConstants.EXERCISE_DB_PATH)
@@ -383,7 +420,6 @@ class ExerciseComboBox(ttk.Combobox):
             # you want the conditions untill the current instance
             conditions = cls.user_conditions[:current_instance_index+1]
             # print(conditions)
-        
 
             list = SqliteDefs.get_distinct_column_values(cls.table_name,
                                                          instance.column_name,
@@ -416,7 +452,7 @@ class ExerciseComboBox(ttk.Combobox):
 
 
 class LabelAndEntry(tk.Frame):
-    def __init__(self, parent, label_name="test", tk_var=None,**kwargs):
+    def __init__(self, parent, label_name="test", tk_var=None, **kwargs):
         super().__init__(parent)
 
         self.rowconfigure(0, weight=1, uniform='a')
@@ -426,7 +462,7 @@ class LabelAndEntry(tk.Frame):
         self.label = ttk.Label(self, text=label_name)
         self.label.grid(row=0, column=0, sticky='news')
 
-        self.entry = tk.Entry(self, textvariable=tk_var,**kwargs)
+        self.entry = tk.Entry(self, textvariable=tk_var, **kwargs)
         self.entry.grid(row=0, column=1, sticky='news')
 
     def get(self):
@@ -446,13 +482,19 @@ class LabelAndEntry(tk.Frame):
 
 
 class IntervalEntry(ttk.Entry):
-    def __init__(self, parent=None,default='', *args, **kwargs):
+    def __init__(self, parent=None, default='', *args, **kwargs):
         super().__init__(master=parent, *args, **kwargs)
         self.time_entry = tk.StringVar(value=default)
+        validation = parent.register(self.validate_input)
         self.configure(textvariable=self.time_entry,
                        #    relief='ridge',
+                       validate="key", validatecommand=(validation, "%P"),
                        justify=tk.CENTER)
-
+    def validate_input(self,new_value):
+    # Your validation logic goes here
+    # For example, let's say we only allow digits
+        if new_value.isdigit() or new_value == "":
+            return True
     def is_int(self):
         try:
             int(self.time_entry.get())
@@ -465,6 +507,8 @@ if __name__ == '__main__':
     root = tk.Tk()
     root.geometry('200x200')
     root.attributes("-topmost", True)
-    UpdateProgressBar(root).pack()
+    # UpdateProgressBar(root).pack()
+    ThemeCombobox(root).pack()
+    # IntervalEntry(parent=root).pack()
     # ReasonTextGui(root)
     root.mainloop()

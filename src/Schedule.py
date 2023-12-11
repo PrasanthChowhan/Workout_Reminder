@@ -3,6 +3,7 @@ import time, threading,sys
 from src.Gui.Gui_Main import NotificationGui
 from src.DbManager import DbManager,ConfigReader
 from src.utils.constants import DatabaseConstants
+from src.utils import helperfunctions
 from src.Gui.tray import WorkoutTray
 from datetime import datetime, timedelta
 import sys
@@ -30,7 +31,9 @@ class Scheduler:
     
     def _schedule_gui(self,):
         exercise = DbManager().give_me_a_exercise()
-        # print('exercise in scheduling gui: \t', exercise, '\n')    
+        exercise = helperfunctions.replace_none_with_empty_string(exercise) ## REmoving None value if present because it will throw error in notion
+        # exercise = DbManager().give_me_themed_exercise()
+        print('exercise in scheduling gui: \t', exercise, '\n')    
         self.root = NotificationGui(exercise_dict=exercise,stop_scheduling_callabck=self.stop_scheduling)
         self.root.mainloop()
     # NOTE: Run Gui on main thread or else it will throw errors
@@ -47,8 +50,8 @@ class Scheduler:
                 schedule_after = int(configuration['schedule'])
                 self.tray.next_exercise_time = self._add_minutes_to_current_time(schedule_after)
                 
-                # time.sleep(10) 
-                time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
+                time.sleep(10) 
+                # time.sleep(schedule_after*60) # sleep is in seconds and interval is in min)
 
 
                 if self._is_thread_exists('SettingGui'): 

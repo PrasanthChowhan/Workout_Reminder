@@ -3,6 +3,7 @@ import yaml
 import random as rnd
 from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import *
+from src.utils.IniManager import IniFileManager
 
 '''
 What this module does 
@@ -131,24 +132,40 @@ class DbManager:
 
         # get user preference from settings.yaml
         user_preference_dict = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
-        user_preference_dict = user_preference_dict['database']
+        user_preference_database_dict = user_preference_dict['database']
+        selected_theme = user_preference_dict['theme']
 
-        if user_preference_dict['muscle'] == 'default': 
-            # if default, cycle through exercises
+        if selected_theme == 'none': #from setting yaml
+            if user_preference_database_dict['muscle'] == 'default': 
+                # if default, cycle through exercises
 
-            if not os.path.exists(self.exercise_log_path): 
-                # if log db doesn't exist, program launched for the first time
-                # so add random exercise
-                user_preference_dict['muscle'] = 'chest' 
+                if not os.path.exists(self.exercise_log_path): 
+                    # if log db doesn't exist, program launched for the first time
+                    # so add random exercise
+                    user_preference_database_dict['muscle'] = 'chest' 
 
-            else:
-                user_preference_dict['muscle'] = ExerciseDatabase().next_muscle()
+                else:
+                    user_preference_database_dict['muscle'] = ExerciseDatabase().next_muscle()
 
-        # process the settings which is dict and convert as a query for searching
-        user_preference_for_query = self.process_settings(user_preference_dict)
+            # process the settings which is dict and convert as a query for searching
+            user_preference_for_query = self.process_settings(user_preference_database_dict)
+            exercise = ExerciseDatabase().select_matching(user_preference_for_query,only_one=True, random=True)
 
-        exercise = ExerciseDatabase().select_matching(user_preference_for_query,only_one=True, random=True)
-        return exercise
+            IniFileManager(DatabaseConstants.INI_PATH).update_value_in_ini('Notheme','last muscle',user_preference_database_dict['muscle'])
+            exercise['theme'] = user_preference_database_dict['equipment']
+            return exercise
+        
+        else:
+            ## Ini file stores everything in string so we are using int ##
+            last_exercise_id = int(IniFileManager(DatabaseConstants.INI_PATH,defualt_file=DatabaseConstants.DEFAULT_INI_PATH).get_value('Theme','exercise number'))
+        
+            try :   # if len of them2 > theme1 and you switched from 2 to 1 it will throw error 
+                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'id',last_exercise_id)
+            except: # if any error occurrs give me the 1 exercise
+                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'id',1)
+            IniFileManager(DatabaseConstants.INI_PATH).update_value_in_ini('Theme','exercise number',str(exercise['id']))
+            exercise['theme'] = selected_theme
+            return exercise
 
     def process_settings(self, setting_dict) -> list:
         '''
@@ -177,9 +194,12 @@ class ExerciseDatabase:
         
         Return: name of next muscle group
         '''
-        # check what was the last muscle targetted
-        last_log_entry = SqliteDefs.get_latest_row_as_dict(self.exercise_log_path,self.exercise_log_table_name)
-        last_muscle_targetted = last_log_entry['muscle']
+        
+        # last_log_entry = SqliteDefs.get_latest_row_as_dict(self.exercise_log_path,self.exercise_log_table_name)
+        # last_muscle_targetted = last_log_entry.get('muscle','chest')
+        
+        ## Created a separate ini file for tracking exercises ##
+        last_muscle_targetted = IniFileManager(DatabaseConstants.INI_PATH,defualt_file=DatabaseConstants.DEFAULT_INI_PATH).get_value('Notheme','last muscle')
         # Id of last muscle
         last_muscle_targetted_dict= SqliteDefs.retrieve_data_as_dict(self.exercise_db_path,'Muscles',[f"muscle = '{last_muscle_targetted}'"])
         # last_muscle_targetted_dict = 
@@ -212,6 +232,8 @@ class ExerciseDatabase:
 if __name__ == '__main__':
    
     exercise = DbManager().give_me_a_exercise()
+    # DbManager().give_me_themed_exercise()
+    print(exercise)
     # pprint.pprint(exercise)
 
     # ➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖➖

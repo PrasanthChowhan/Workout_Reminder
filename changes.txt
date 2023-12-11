@@ -1,1 +1,16 @@
 Added run at start by creating the shortcut of bat file
+
+----------------------------------------------------------------
+06 Dec 2023
+* Changing the equipment to themes in columns
+* Each theme has its own table
+
+* no difficulty level selection
+* no muscle selection
+
+Exercise_setting_Gui:
+* integer validation in interval min
+* using grid layout instead of pack
+
+Additions:
+* IniManager, using Ini file to track last exercise done

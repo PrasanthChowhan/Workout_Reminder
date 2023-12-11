@@ -4,33 +4,37 @@ from src.utils.SQLITE import SqliteDefs
 from src.utils.constants import DatabaseConstants
 from src.DbManager import ConfigReader
 
+
 def check_requirements(func):
     def wrapper(self, *args, **kwargs):
         if self.save is True and self.NOTION_API_KEY != "" and self.PAGE_ID != "":
             return func(self, *args, **kwargs)
         else:
-            print(f"Requirements not met. function '{func.__name__}' not executed.")
+            print(
+                f"Requirements not met. function '{func.__name__}' not executed.")
     return wrapper
+
 
 class NotionIntergrate:
     def __init__(self):
         self.DBURL = "https://api.notion.com/v1/databases/"
         self.pageurl = "https://api.notion.com/v1/pages"
-        
+
         # self.NOTION_API_KEY = ""
         # self.PAGE_ID = ""
-        settings = ConfigReader.read_config_file(DatabaseConstants.SETTINGS_YAML_PATH,default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
-        self.notion_settings = settings.get('Integration setting', {}).get('Notion',{})
+        settings = ConfigReader.read_config_file(
+            DatabaseConstants.SETTINGS_YAML_PATH, default_file=DatabaseConstants.DEFUALT_SETTINGS_YAML_PATH)
+        self.notion_settings = settings.get(
+            'Integration setting', {}).get('Notion', {})
 
-        self.NOTION_API_KEY = self.notion_settings.get('api','')
-        self.PAGE_ID = self.notion_settings.get('page_id','')
+        self.NOTION_API_KEY = self.notion_settings.get('api', '')
+        self.PAGE_ID = self.notion_settings.get('page_id', '')
 
         self.headers = {
             "Authorization": self.NOTION_API_KEY,
             "Content-Type": "application/json",
             "Notion-Version": "2022-06-28"
         }
-
 
         self.save = self.notion_settings.get('save', False)
 
@@ -40,14 +44,149 @@ class NotionIntergrate:
             if self.save:
 
                 # CHECK IF DBID EXISTS IF NOT CREATE DATABASE
-                self.database_id = self.notion_settings.get('database_id', None)
+                self.database_id = self.notion_settings.get(
+                    'database_id', None)
                 if self.database_id == None or self.database_id == '':
-                    self.database_id = self.create_db()
+                    self.database_id = self.themed_create_db()
                     settings['Integration setting']['Notion']['database_id'] = self.database_id
                     ## Add to file ##
-                    ConfigReader().update_or_create_yaml_file(DatabaseConstants.SETTINGS_YAML_PATH, settings)
+                    ConfigReader().update_or_create_yaml_file(
+                        DatabaseConstants.SETTINGS_YAML_PATH, settings)
 
         # print(self.notion_setting)
+    def themed_create_db(self):
+        ## STRUCTURE OF DATABSE ##
+        data = {
+            "parent": {
+                "type": "page_id",
+                "page_id": self.PAGE_ID
+            },
+            "icon": {
+                "type": "emoji",
+                "emoji": "🔥"
+            },
+            "cover": {
+                "type": "external",
+                "external": {
+                    "url": "https://unsplash.com/photos/qZ-U9z4TQ6A"
+                }
+            },
+            "title": [
+                {
+                    "type": "text",
+                    "text": {
+                        "content": "My Workouts",
+                        "link": None
+                    }
+                }
+            ],
+            "properties": {
+                "Exercise Name": {
+                    "title": {}
+                },
+                "Reason": {
+                    "rich_text": {}
+                },
+                "Completed": {
+                    "checkbox": {}
+                },
+                "Muscle targetted": {
+                    "rich_text": {}
+                },
+                "Theme": {
+                    "rich_text": {}
+
+                },
+                "Difficulty": {
+                   "rich_text": {}
+                },
+                "Done on": {
+                    'date': {}
+                }
+
+
+            }
+        }
+        response_data = self.send_request(self.DBURL, data)
+        database_id = response_data.get('id', 'error creating db')
+        return database_id
+    
+    @check_requirements
+    def themed_add_row_to_database(self,user_log: dict = {}):
+        ## USE KEYS FROM EXERCISELOG ##
+        print(user_log)
+        newPagedata = {
+            "parent": {"type": "database_id", "database_id": self.database_id},
+            "properties": {
+                "Exercise Name": {
+                    "type": "title",
+                    "title": [{"type": "text",
+                               "text": {
+                                   "content": user_log.get('name', 'Test'),
+                                   "link": {'url': user_log.get('url', 'https://www.youtube.com/@prasanthchowhan')}
+                               }
+                               }]
+                },
+                "Completed": {
+                    # "type": "checkbox",
+                    "checkbox": user_log.get('completed', False)
+                },
+                "Difficulty": {
+                    "rich_text": [{
+                        "type": "text",
+                                "text": {
+                                    "content": user_log.get('difficulty',' '),
+                                    "link": None
+                                },
+                       
+
+                    }],
+                },
+                "Muscle targetted": {
+                    "rich_text": [{
+                        "type": "text",
+                                "text": {
+                                    "content": user_log.get('muscle', ''),
+                                    "link": None
+                                },
+
+                    }],
+                },
+                "Theme": {
+                    "rich_text": [{
+                        "type": "text",
+                                "text": {
+                                    "content": user_log.get('theme', ' '),
+                                    "link": None
+                                },
+                        ## if you ever wanted to retrive unfromatted text use create a plain text ##
+
+                    }],
+                },
+                "Reason": {
+                    "rich_text": [{
+                        "type": "text",
+                                "text": {
+                                    "content": user_log.get('reason', 'test_reason'),
+                                    "link": None
+                                },
+                        ## if you ever wanted to retrive unfromatted text use create a plain text ##
+
+                    }],
+
+                },
+                "Done on": {
+
+                    "type": "date",
+                    "date": {
+                        "start": user_log.get('date_time', "1999-09-09T09:09:09"),
+                        "end": None,
+                        "time_zone": 'Asia/Kolkata'
+                    }
+                }
+            }
+        }
+        self.send_request(self.pageurl, newPagedata)
 
     def create_db(self):
         ## STRUCTURE OF DATABSE ##
@@ -112,9 +251,9 @@ class NotionIntergrate:
             }
         }
         response_data = self.send_request(self.DBURL, data)
-        database_id = response_data.get('id','error creating db')
+        database_id = response_data.get('id', 'error creating db')
         return database_id
-    
+
     @check_requirements
     def add_row_to_database(self, user_log: dict = {}):
 
@@ -138,7 +277,7 @@ class NotionIntergrate:
                 },
                 "Difficulty": {
                     "select": {
-                        "name": user_log.get('difficulty', 'beginner')
+                        "name": user_log.get('difficulty', ' ')
                     }
                 },
                 "Muscle targetted": {
@@ -149,7 +288,7 @@ class NotionIntergrate:
                 },
                 "Equipment": {
                     "select": {
-                        "name": user_log.get('equipment', 'bodyweight')
+                        "name": user_log.get('difficulty', ' ')
                     }
                 },
                 "Reason": {
@@ -192,8 +331,8 @@ class NotionIntergrate:
             print(f"Request failed with status code {response.status_code}")
             print(f"Error message: {error_message}")
 
-
     ## SUPPORTING FUNCTIONS ##
+
     def _create_option_from_db(self, table_name: str, column_name: str):
 
         values = SqliteDefs.get_distinct_column_values(

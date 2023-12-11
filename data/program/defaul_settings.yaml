@@ -6,6 +6,7 @@ Integration setting:
     page_id: ''
     save: false
 database:
+  theme: 
   difficulty: beginner
   equipment: bodyweight
   muscle: default

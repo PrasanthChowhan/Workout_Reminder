@@ -4,3 +4,4 @@ requests
 schedule
 pystray
 pywin32
+pandas

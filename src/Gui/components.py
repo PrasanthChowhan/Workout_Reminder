@@ -329,7 +329,6 @@ class DisableInteractionWithOtherWindow(tk.Toplevel):
 class ThemeCombobox(ttk.Combobox):
     def __init__(self, parent=None, label_frame_text=None,default = None, widgets=None):
         self.widgets = widgets
-
         label_frame = ttk.Labelframe(master=parent, text=label_frame_text)
         label_frame.pack()
         validate = parent.register(self.__validate_function)

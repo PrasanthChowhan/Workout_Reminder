@@ -16,6 +16,7 @@ install_requires = [
     "schedule",
     "pystray",
     "pywin32",
+    "pandas"
 ]
 
 setup(

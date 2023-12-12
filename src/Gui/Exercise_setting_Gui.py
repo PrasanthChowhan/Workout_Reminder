@@ -1,4 +1,4 @@
-from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry,UpdateProgressBar,ThemeCombobox
+from src.Gui.components import ExerciseComboBox, IntervalIcon, IntervalEntry, LabelAndEntry, UpdateProgressBar, ThemeCombobox
 import tkinter as tk
 from tkinter import ttk
 from src.DbManager import ConfigReader
@@ -9,6 +9,7 @@ import webbrowser
 import threading
 from src.SubprocessCommands import SubprocessCommands
 from src.utils.startup_manager import StartupFileManager
+from src.utils.CsvManager import CsvAndSQLite
 # from testing_python import open_tray
 
 
@@ -49,7 +50,7 @@ class SettingFrame(tk.Frame):
 
         self.setting_notebook = SettingNotebook(
             parent=self, update_gui_callback=lambda: self.system_upadating_protocol(initialise=True))
-        self.setting_notebook.pack(fill='both',expand=True)
+        self.setting_notebook.pack(fill='both', expand=True)
         self.save_button = ttk.Button(master=self, text='Save',
                                       command=self.save_command)
         self.save_button.pack(fill='x')
@@ -61,16 +62,18 @@ class SettingFrame(tk.Frame):
             text='Save', state='normal'))
         self.system_upadating_protocol(initialise=False)
 
-    def system_upadating_protocol(self, initialise=False,): # order or execution is important
-        if initialise: # INitialise again only after update.
+    # order or execution is important
+    def system_upadating_protocol(self, initialise=False,):
+        if initialise:  # INitialise again only after update.
             GitCommands.git_pull()
-            SubprocessCommands.run_subprocess('initialise') # next line is executed after subprocess is finished
-        
-        threading.Thread(target=SubprocessCommands.run_subprocess,args=('schedule', )).start()
+            # next line is executed after subprocess is finished
+            SubprocessCommands.run_subprocess('initialise')
+
+        threading.Thread(target=SubprocessCommands.run_subprocess,
+                         args=('schedule', )).start()
         if self.stop_scheduling_callback:
             self.stop_scheduling_callback()
         self.winfo_toplevel().destroy()  # destroying the root
-
 
 
 class SettingNotebook(ttk.Notebook):
@@ -90,6 +93,7 @@ class SettingNotebook(ttk.Notebook):
             parent=self, setting_dict=setting_dict)
         self.tab['Save to'] = OnlineIntergration(
             parent=self, setting_dict=setting_dict)
+        self.tab['My Exercise'] = CustomTheme(parent=self)
         self.tab['update'] = update_feedback(
             parent=self, update_gui_callback=update_gui_callback)
 
@@ -111,15 +115,15 @@ class MuscleSetting(ttk.Frame):
     def __init__(self, parent=None, setting_dict: dict = {}):
         super().__init__(master=parent)
 
-        self.rowconfigure((0,1,2,3,4,5),weight=1,uniform='a')
-        self.columnconfigure((0,1),uniform='a',weight=1)
+        self.rowconfigure((0, 1, 2, 3, 4, 5), weight=1, uniform='a')
+        self.columnconfigure((0, 1), uniform='a', weight=1)
 
         self.notify_var = tk.StringVar(value='')
 
         ## Timer settings ##
         timer_frame = tk.Frame(master=self)
-    
-        timer_frame.grid(row=0,column=0,sticky='news',columnspan=2)
+
+        timer_frame.grid(row=0, column=0, sticky='news', columnspan=2)
         interval_icon = IntervalIcon(parent=timer_frame, img_path=r'resources\icons\setting_gui\clock.png',
                                      text='Interval (min)')
         interval_icon.pack(side='left', fill='x',
@@ -132,16 +136,16 @@ class MuscleSetting(ttk.Frame):
 
         # MESSAGE
         self.notify_label = ttk.Label(master=self,
-                                      textvariable=self.notify_var,anchor='center')
-  
-        self.notify_label.grid(row=1,column=0,sticky='news',columnspan=2)
-    
+                                      textvariable=self.notify_var, anchor='center')
+
+        self.notify_label.grid(row=1, column=0, sticky='news', columnspan=2)
 
         ## COMBOBOX FRAME ##
         combi_setting: dict = setting_dict.get('database', {})
 
         self.combo_frame = tk.Frame(master=self)
-        self.combo_frame.grid(row=3,column=0,sticky='news',rowspan=2,columnspan=2)
+        self.combo_frame.grid(
+            row=3, column=0, sticky='news', rowspan=2, columnspan=2)
 
         self.equipment_combi = ExerciseComboBox(parent=self.combo_frame,
                                                 column_name='equipment',
@@ -164,7 +168,8 @@ class MuscleSetting(ttk.Frame):
         ## This code will set self.cycle_muscle_var to True if the value of setting_dict['muscle'] is 'default', and it will set it to False for any other value. ##
         check_btn_frame = tk.Frame(master=self)
         # check_btn_frame.pack(fill='x')
-        check_btn_frame.grid(row=5,column=0,sticky='news',padx=2,pady=2,columnspan=2)
+        check_btn_frame.grid(row=5, column=0, sticky='news',
+                             padx=2, pady=2, columnspan=2)
 
         self.cycle_muscle_var = tk.BooleanVar(
             value=combi_setting.get('muscle', '') == 'default')
@@ -172,28 +177,29 @@ class MuscleSetting(ttk.Frame):
                                             text='Target all Muscles',
                                             command=self.save_all_muscles_setting,
                                             onvalue=True, offvalue=False, variable=self.cycle_muscle_var)
-        self.cycle_muscle.grid(row=5,column=1)
+        self.cycle_muscle.grid(row=5, column=1)
         # self.cycle_muscle.pack(padx=5, pady=5,side='left',fill='both',expand=True)
 
-        self.run_at_startup_var = tk.BooleanVar(value=setting_dict.get('run_at_start',False))
-        self.run_at_startup_var_check_btn = ttk.Checkbutton(master=self,onvalue=True,offvalue=False,command=self._startup_func,text='Run at startup',variable=self.run_at_startup_var)
+        self.run_at_startup_var = tk.BooleanVar(
+            value=setting_dict.get('run_at_start', False))
+        self.run_at_startup_var_check_btn = ttk.Checkbutton(
+            master=self, onvalue=True, offvalue=False, command=self._startup_func, text='Run at startup', variable=self.run_at_startup_var)
         # self.run_at_startup_var_check_btn.pack(padx=5, pady=5,side='left',fill='x',expand=True)
-        self.run_at_startup_var_check_btn.grid(row=5,column=0)
+        self.run_at_startup_var_check_btn.grid(row=5, column=0)
 
         ## Theme Frame ##
         self.theme_frame = tk.Frame(master=self)
-        self.theme_frame.grid(row=2,column=0,sticky='news',rowspan=1,columnspan=2)
+        self.theme_frame.grid(
+            row=2, column=0, sticky='news', rowspan=1, columnspan=2)
         self.theme_combi = ThemeCombobox(parent=self.theme_frame,
-                      label_frame_text="Theme",
-                      default = setting_dict.get('theme',''),
-                      widgets=[self.cycle_muscle,self.combo_frame])
+                                         label_frame_text="Theme",
+                                         default=setting_dict.get('theme', ''),
+                                         widgets=[self.cycle_muscle, self.combo_frame])
         self.theme_combi.pack(fill='x', padx=5, pady=5)
-        
-        
 
-    
     def _startup_func(self):
-        startup_manager = StartupFileManager('Workout reminder.bat') # This bat will launch python
+        startup_manager = StartupFileManager(
+            'Workout reminder.bat')  # This bat will launch python
         if self.run_at_startup_var.get():
             startup_manager.add_to_startup()
         else:
@@ -219,17 +225,16 @@ class MuscleSetting(ttk.Frame):
             muscle = self.muscle_combi.get()
 
         setting_data = {
-                        'equipment': self.equipment_combi.get(),
-                        'muscle': muscle,
-                        'difficulty': self.difficulty_combi.get()
-                        }
+            'equipment': self.equipment_combi.get(),
+            'muscle': muscle,
+            'difficulty': self.difficulty_combi.get()
+        }
 
-        for_data_base = {'theme':self.theme_combi.get(),
-                        'database': setting_data,
+        for_data_base = {'theme': self.theme_combi.get(),
+                         'database': setting_data,
                          'schedule': self.interval_entry.get(),
                          'run_at_start': self.run_at_startup_var.get()}
 
-        
         return for_data_base
 
     def save_user_settings(self):
@@ -329,7 +334,8 @@ class OnlineIntergration(ttk.Notebook):
             self.notify_label = ttk.Label(self, text='', anchor=tk.CENTER)
             self.notify_label.pack(fill='x', padx=5, pady=5)
 
-            self.link_button = ttk.Button(self,text='watch how',command= lambda:webbrowser.open('https://youtu.be/s7mJYc40D4U'),cursor='hand2')
+            self.link_button = ttk.Button(self, text='watch how', command=lambda: webbrowser.open(
+                'https://youtu.be/s7mJYc40D4U'), cursor='hand2')
             self.link_button.pack()
 
         def show(self):
@@ -344,6 +350,21 @@ class OnlineIntergration(ttk.Notebook):
             return dict
 
 
+class CustomTheme(ttk.Frame):
+    def __init__(self, parent=None):
+        super().__init__(master=parent)
+        template_button = ttk.Button(
+            master=self, text='Create Template', command=CsvAndSQLite().create_csv_template)
+        template_button.pack(padx=2, pady=2)
+
+        csv_to_dbtable = ttk.Button(
+            master=self, text='add theme', command=CsvAndSQLite().add_theme_to_workoutreminder)
+        csv_to_dbtable.pack(padx=2, pady=2)
+
+    def get_info(self):  # mandatory
+        return {}
+
+
 class update_feedback(ttk.Frame):
     def __init__(self, parent=None, update_gui_callback=None):
         super().__init__(master=parent)
@@ -354,17 +375,17 @@ class update_feedback(ttk.Frame):
         self.release_notes_msg = tk.StringVar(value='')
 
         self.update_section = tk.Frame(master=self)
-        self.update_section.rowconfigure(0,weight=1,uniform='a')
-        self.update_section.columnconfigure((0,1,2),weight=1,uniform='a')
+        self.update_section.rowconfigure(0, weight=1, uniform='a')
+        self.update_section.columnconfigure((0, 1, 2), weight=1, uniform='a')
         self.update_section.pack(fill='x', padx=2, pady=2)
 
         ttk.Button(self.update_section, text='Check for updates',
-                   command=self.check_for_updates, cursor='hand2').grid(row=0,column=0,sticky='news')
+                   command=self.check_for_updates, cursor='hand2').grid(row=0, column=0, sticky='news')
         self.label = ttk.Label(self.update_section, textvariable=self.msg_var,
-                               justify='center', anchor='center')        
+                               justify='center', anchor='center')
         self.update_button = ttk.Button(self.update_section, textvariable=self.msg_var, cursor='hand2',
                                         command=self.update_availbale_function)
-        
+
         self.text_box = tk.Text(self, relief='flat',
                                 wrap=tk.WORD, width=35, height=12)
         self.progress_bar = UpdateProgressBar(self)
@@ -379,7 +400,7 @@ class update_feedback(ttk.Frame):
         self.msg_var.set(value=status['text'])
 
         if status['text'] == 'Update now':
-            self.update_button.grid(row=0,column=2,sticky='news',padx=2)
+            self.update_button.grid(row=0, column=2, sticky='news', padx=2)
             # self.update_button.pack(padx=5, pady=5, side='right')
             self.text_box.pack()
 
@@ -387,16 +408,15 @@ class update_feedback(ttk.Frame):
             self.text_box.config(state='disabled')
 
         else:
-            self.label.grid(row=0,column=2,sticky='news',padx=2)
+            self.label.grid(row=0, column=2, sticky='news', padx=2)
             # self.label.pack(padx=5, pady=5, fill='x', side='right')
+
     def update_availbale_function(self):
         pulling_thread = threading.Thread(target=self.update_gui_callback)
         pulling_thread.start()
         self.text_box.forget()
-        self.progress_bar.pack(fill="x",expand=True, padx=20, pady=20)
+        self.progress_bar.pack(fill="x", expand=True, padx=20, pady=20)
         self.progress_bar.start(10)
-
-
 
     def open_feedback(self):
         webbrowser.open(WebLinks.GOOGLE_FORMS)

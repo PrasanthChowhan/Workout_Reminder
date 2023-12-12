@@ -27,12 +27,17 @@ class CreateCSV:
 
 
 class CsvAndSQLite:
-    # def __init__(self,):
+    def __init__(self,):
+        self.headers = ["name", "muscle", "difficulty", "url"]
 
     def csv_to_sqlite(self, csv_filename, db_filename, table_name):
         try:
             # Read the CSV file into a Pandas DataFrame
             df = pd.read_csv(csv_filename)
+            
+            # Check if the CSV file contains the required headers
+            if not set(self.headers).issubset(df.columns):
+                raise ValueError(f"🔴 Error: CSV file '{csv_filename}' is missing required headers.")
 
             # Add a new column 'serial_number' as an integer counter
             df.insert(0, 'exercise_number', range(1, len(df) + 1))
@@ -62,12 +67,12 @@ class CsvAndSQLite:
 
  # csv structure | name,muscle,difficulty,url
     def create_csv_template(self):
-        fieldnames = ["name", "muscle", "difficulty", "url"]
+        
         file_path = filedialog.asksaveasfilename(
             defaultextension=".csv", filetypes=[("CSV files", "*.csv")])
         # Write CSV file with headers only
         with open(file_path, mode='w', newline='') as csv_file:
-            writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
+            writer = csv.DictWriter(csv_file, fieldnames=self.headers)
             # Write headers
             writer.writeheader()
         print(f"🟢 Empty CSV file with headers created at: {file_path}")

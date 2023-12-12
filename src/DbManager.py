@@ -160,10 +160,10 @@ class DbManager:
             last_exercise_id = int(IniFileManager(DatabaseConstants.INI_PATH,defualt_file=DatabaseConstants.DEFAULT_INI_PATH).get_value('Theme','exercise number'))
         
             try :   # if len of them2 > theme1 and you switched from 2 to 1 it will throw error 
-                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'id',last_exercise_id)
+                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'exercise_number',last_exercise_id)
             except: # if any error occurrs give me the 1 exercise
-                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'id',1)
-            IniFileManager(DatabaseConstants.INI_PATH).update_value_in_ini('Theme','exercise number',str(exercise['id']))
+                exercise = SqliteDefs.get_next_entry(DatabaseConstants.THEMED_DB_PATH,selected_theme,'exercise_number',1)
+            IniFileManager(DatabaseConstants.INI_PATH).update_value_in_ini('Theme','exercise number',str(exercise['exercise_number']))
             exercise['theme'] = selected_theme
             return exercise
 
